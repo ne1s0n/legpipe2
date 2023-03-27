@@ -6,6 +6,6 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/legpipe2')
 #ready to import
 import legpipe2
 
-conf = legpipe2.read_config('sample_config.ini')
+conf = legpipe2.Legpipe2('sample_config.ini')
 
 print(conf)
