@@ -7,6 +7,5 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/legpipe2')
 import legpipe2
 
 conf = legpipe2.read_config('sample_config.ini')
-print(conf['Common']['core'])
-print(conf['Arthur']['core'])
 
+print(conf)
