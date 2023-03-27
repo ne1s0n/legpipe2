@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Automatick backup from ghostwriter
+*.md.backup
