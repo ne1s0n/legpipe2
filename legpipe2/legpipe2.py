@@ -15,8 +15,12 @@ def read_config(infile):
 	for section in config.sections():
 		res[section] = {}
 		for key in config[section]:
-			#some 
-			res[section][key] = config[section][key]
+			#some values should be interpolated on the fly
+			if key == 'run_this':
+				res[section][key] = config[section].getboolean(key)	
+			else:
+				#just copying the value
+				res[section][key] = config[section][key]
 	
 	#validating everything, look for invalid values
 	_validate_subsample(res)
