@@ -1,6 +1,8 @@
 import configparser
 import copy
 
+import rename_reads
+
 def read_config(infile):
 	'''
 	Reads the config file in .ini format, parse some data so e.g. there's lists
