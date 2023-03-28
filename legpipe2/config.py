@@ -1,3 +1,13 @@
+#This module implements .ini config file parsing, plus several data transformation and
+#validation. The core function is read_config(), which requires the .ini infile and
+#returns a two (or more) levels dictionary (not a configparser). First level keys are 
+#the .ini sections, second level are values.  
+#We use the same notation as configparser objects, in particular we refer to "interpolate"
+#as the operation of tweaking data, e.g. typing (so that values are actually booleans, int
+#and so forth). The main extra functionality injected is the possibility of having lists,
+#which are not supported by configparser. When possible we use however configparser
+#native interpolation/validation mechanisms
+
 import configparser
 import copy
 
@@ -27,19 +37,34 @@ def read_config(infile):
 	
 	#interpolating some special cases (e.g. 
 	#values that should actually be integer or lists)
-	res = _interpolate_rename_reads(res)
-	res = _interpolate_subsample(res)
+	res = _interpolate_rename_reads(res, config)
+	res = _interpolate_subsample(res, config)
+	res = _interpolate_trim(res, config)
 	
 	return(res)
 
-def _interpolate_subsample(conf):
-	'''some values are integer'''
+def _interpolate_subsample(conf, raw_conf):
 	conf['subsample']['seed'] = int(conf['subsample']['seed']) 
 	conf['subsample']['reads'] = int(conf['subsample']['reads']) 
 	return(conf)
 
+def _interpolate_trim(conf, raw_conf):
+
+	#these values should be boolean
+	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
+	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
+
+	#these values should be int
+	conf['trim']['cores'] = raw_conf['trim'].getint('cores') 
+
+	#if max_samples is zero it goes to +Infinity
+	conf['trim']['max_samples'] = raw_conf['trim'].getint('max_samples')
+	if conf['trim']['max_samples'] == 0:
+		conf['trim']['max_samples'] = float('inf')
 	
-def _interpolate_rename_reads(conf):
+	return(conf)
+	
+def _interpolate_rename_reads(conf, raw_conf):
 	'''two groups of values should become lists with the same internal order
 		- INFOLDER_X (e.g. INFOLDER_1, INFOLDER_2, ...)
 		- OUTFILE_PREFIX_X (e.g. OUTFILE_PREFIX_1, OUTFILE_PREFIX_2, ...) 

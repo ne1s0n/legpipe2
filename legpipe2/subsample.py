@@ -17,7 +17,7 @@ def subsample(conf):
 	READS=conf['subsample']['reads']
 	#tool to be used
 	TOOL=conf['subsample']['tool']
-	RUN_THIS=conf['rename_reads']['run_this']
+	RUN_THIS=conf['subsample']['run_this']
 
 	#interface
 	common.print_step_header('subsample')
