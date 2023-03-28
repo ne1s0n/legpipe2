@@ -8,4 +8,4 @@ import legpipe2
 
 conf = legpipe2.Legpipe2('sample_config.ini')
 
-print(conf)
+#print(conf)
