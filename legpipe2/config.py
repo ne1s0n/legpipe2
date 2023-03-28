@@ -15,7 +15,7 @@ def read_config(infile):
 	for section in config.sections():
 		res[section] = {}
 		for key in config[section]:
-			#some values should be interpolated on the fly
+			#this value is common to every section and we interpolate it on the fly
 			if key == 'run_this':
 				res[section][key] = config[section].getboolean(key)	
 			else:
@@ -26,10 +26,18 @@ def read_config(infile):
 	_validate_subsample(res)
 	
 	#interpolating some special cases (e.g. 
-	#values that should actually be lists)
+	#values that should actually be integer or lists)
 	res = _interpolate_rename_reads(res)
+	res = _interpolate_subsample(res)
 	
 	return(res)
+
+def _interpolate_subsample(conf):
+	'''some values are integer'''
+	conf['subsample']['seed'] = int(conf['subsample']['seed']) 
+	conf['subsample']['reads'] = int(conf['subsample']['reads']) 
+	return(conf)
+
 	
 def _interpolate_rename_reads(conf):
 	'''two groups of values should become lists with the same internal order

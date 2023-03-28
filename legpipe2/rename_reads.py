@@ -4,6 +4,7 @@
 import subprocess
 import glob
 import os
+import common
 
 def rename_reads(conf):
 	#local copies of configuration variables, to have a leaner code
@@ -13,7 +14,7 @@ def rename_reads(conf):
 	RUN_THIS=conf['rename_reads']['run_this']
 	
 	#interface
-	print(' - rename_reads')
+	common.print_step_header('rename_reads')
 	
 	#should we do something?
 	if not RUN_THIS:
