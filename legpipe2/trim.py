@@ -1,9 +1,6 @@
 #trim reads to remove restriction sites and low quality bases using ‘fastp’ 
 #(https://github.com/OpenGene/fastp). Put output in a new directory
 
-#original, from dDocent pipeline
-#fastp --in1 $1.F.fq.gz --in2 $1.R.fq.gz --out1 $1.R1.fq.gz --out2 $1.R2.fq.gz --cut_front 20 --cut_tail 20 --cut_window_size 5 --cut_mean_quality 15 --correction $TW -q 15 -u 50 -j $1.json -h $1.html --detect_adapter_for_pe &> $1.trim.log
-
 #----------- IMPORT
 import common
 import subprocess
@@ -37,12 +34,12 @@ def _create_filenames(infile_R1, outfolder):
 	return(res)
 
 #executes the trimming for one R1/R2 pair
-def _do_trim(infile_R1, outfolder):
+def _do_trim(infile_R1, outfolder, trim_cmd):
 	#--------- filenames
 	fn = _create_filenames(infile_R1, outfolder)
 	
 	#--------- fastp
-	cmd = 'fastp  --cut_front 20 --cut_tail 20 --cut_window_size 5 --cut_mean_quality 15 --correction -q 15 -u 50'
+	cmd = trim_cmd
 	cmd += ' --in1 '  + fn['infile_R1']    + ' --in2 '  +  fn['infile_R2']
 	cmd += ' --out1 ' + fn['outfile_R1']   + ' --out2 ' +  fn['outfile_R2']
 	cmd += ' -j '     + fn['outfile_json'] + ' -h '     +  fn['outfile_html']
@@ -68,8 +65,8 @@ def trim(conf):
 	#if TRUE samples already processed will be skipped
 	SKIP_PREVIOUSLY_COMPLETED=conf['trim']['skip_previously_completed']
 	RUN_THIS=conf['trim']['run_this']
-
-	print(
+	#the actual trim command
+	TRIM_CMD=conf['trim']['trim_cmd']
 
 	#interface
 	common.print_step_header('trim')
@@ -99,7 +96,8 @@ def trim(conf):
 		#the arguments are passed as positionals
 		args_now = pd.DataFrame({
 			'infile_R1' : [infile_R1], 
-			'outfolder' : [OUTFOLDER] 
+			'outfolder' : [OUTFOLDER],
+			'trim_cmd'  : [TRIM_CMD] 
 		})
 		
 		#storing in a single df
