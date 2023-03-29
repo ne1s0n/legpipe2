@@ -14,6 +14,7 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
+- update cmd invocation to support extra arguments, following demultiplex module example
 - implement SNP calling module
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)
@@ -21,6 +22,3 @@ Work in progress & not ready to run. Stay tuned.
 	- [optional?] Consolidate SNPs
 	- [optional?] Select SNPs based on parental scores (only applies to some mapping populations)
 	- [optional?] Remove cosegregating SNP markers
-- move all cmd invocation from string to array format so to sanitize spaces
-- move all parameter interpolation in their respective modules
-- remove Shell=True from subprocess.run invocation
