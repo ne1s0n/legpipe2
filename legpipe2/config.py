@@ -10,6 +10,8 @@
 
 import configparser
 import copy
+from demultiplex import demultiplex_validate
+from subsample import subsample_validate
 
 def read_config(infile):
 	'''
@@ -32,14 +34,15 @@ def read_config(infile):
 				#just copying the value
 				res[section][key] = config[section][key]
 	
-	#validating everything, look for invalid values
-	_validate_subsample(res)
-	
 	#interpolating some special cases (e.g. 
 	#values that should actually be integer or lists)
 	res = _interpolate_rename_reads(res, config)
 	res = _interpolate_subsample(res, config)
 	res = _interpolate_trim(res, config)
+	
+	#validating everything, look for invalid values
+	subsample_validate(res)
+	demultiplex_validate(res)
 	
 	return(res)
 
@@ -90,7 +93,3 @@ def _interpolate_rename_reads(conf, raw_conf):
 	
 	return(res)
 
-def _validate_subsample(conf):
-	if conf['subsample']['tool'] not in ['cat', 'seqtk']:
-		msg = 'Config parameter subsample/tool must be in [cat, seqtk], found : ' + conf['subsample']['tool']  
-		raise ValueError(msg)

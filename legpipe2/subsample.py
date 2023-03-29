@@ -7,6 +7,11 @@ import glob
 import os
 import common
 
+def subsample_validate(conf):
+	if conf['subsample']['tool'] not in ['cat', 'seqtk']:
+		msg = 'Config parameter subsample/tool must be in [cat, seqtk], found : ' + conf['subsample']['tool']  
+		raise ValueError(msg)
+		
 def subsample(conf):
 	#basic folder
 	INFOLDER=conf['subsample']['infolder']

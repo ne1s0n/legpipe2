@@ -1,5 +1,5 @@
-#the .fastq.gz files so far are in two folders, divided by plate. We want to
-#create a single folder with all the files - not copies, just sybolic links
+#the .fastq.gz files so far are in two or mode folders (usually divided by plate).
+#We want to create a single folder with all the files - not copies, just sybolic links
 
 import subprocess
 import glob
