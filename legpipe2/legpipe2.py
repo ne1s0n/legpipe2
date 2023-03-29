@@ -17,8 +17,6 @@ def Legpipe2(infile):
 	subsample(conf)
 	trim(conf)
 	
-	print(conf['demultiplex'])
-	
 	#done
 	return(conf)
 

@@ -13,9 +13,26 @@ import sys
 from multiprocessing.pool import ThreadPool 
 
 #----------- SUPPORT FUNCTIONS
-#returns a dictionary with all the filenames derived from the input R1
-#and the outfolder
+def interpolate(conf, raw_conf):
+	'''transform incoming config parameters from .ini file'''
+	#these values should be boolean
+	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
+	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
+
+	#these values should be int
+	conf['trim']['cores'] = raw_conf['trim'].getint('cores') 
+
+	#if max_samples is zero it goes to +Infinity
+	conf['trim']['max_samples'] = raw_conf['trim'].getint('max_samples')
+	if conf['trim']['max_samples'] == 0:
+		conf['trim']['max_samples'] = float('inf')
+	
+	return(conf)
+
 def _create_filenames(infile_R1, outfolder):
+	'''returns a dictionary with all the filenames derived from the input R1
+	and the outfolder'''
+	
 	res = {'infile_R1' : infile_R1}
 	
 	#core sample name, without path and file extension
@@ -33,8 +50,8 @@ def _create_filenames(infile_R1, outfolder):
 	
 	return(res)
 
-#executes the trimming for one R1/R2 pair
 def _do_trim(infile_R1, outfolder, trim_cmd):
+	'''executes the trimming for one R1/R2 pair'''
 	#--------- filenames
 	fn = _create_filenames(infile_R1, outfolder)
 	

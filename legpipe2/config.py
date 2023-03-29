@@ -9,9 +9,10 @@
 #native interpolation/validation mechanisms
 
 import configparser
-import copy
+import subsample
+import trim
+import rename_reads
 import demultiplex
-from subsample import subsample_validate
 
 def read_config(infile):
 	'''
@@ -36,61 +37,14 @@ def read_config(infile):
 	
 	#interpolating some special cases (e.g. 
 	#values that should actually be integer or lists)
-	res = _interpolate_rename_reads(res, config)
-	res = _interpolate_subsample(res, config)
-	res = _interpolate_trim(res, config)
+	res = rename_reads.interpolate(res, config)
+	res = subsample.interpolate(res, config)
+	res = trim.interpolate(res, config)
 	res = demultiplex.interpolate(res, config)
 	
 	#validating everything, look for invalid values
-	subsample_validate(res)
+	subsample.validate(res)
 	demultiplex.validate(res)
-	
-	return(res)
-
-def _interpolate_subsample(conf, raw_conf):
-	conf['subsample']['seed'] = int(conf['subsample']['seed']) 
-	conf['subsample']['reads'] = int(conf['subsample']['reads']) 
-	return(conf)
-
-def _interpolate_trim(conf, raw_conf):
-
-	#these values should be boolean
-	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
-	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
-
-	#these values should be int
-	conf['trim']['cores'] = raw_conf['trim'].getint('cores') 
-
-	#if max_samples is zero it goes to +Infinity
-	conf['trim']['max_samples'] = raw_conf['trim'].getint('max_samples')
-	if conf['trim']['max_samples'] == 0:
-		conf['trim']['max_samples'] = float('inf')
-	
-	return(conf)
-	
-def _interpolate_rename_reads(conf, raw_conf):
-	'''two groups of values should become lists with the same internal order
-		- INFOLDER_X (e.g. INFOLDER_1, INFOLDER_2, ...)
-		- OUTFILE_PREFIX_X (e.g. OUTFILE_PREFIX_1, OUTFILE_PREFIX_2, ...) 
-	'''
-	#an editable copy of the dictionary, so that we can manipulate while iterating
-	res = copy.deepcopy(conf)
-	res['rename_reads']['infolders'] = []
-	res['rename_reads']['outfile_prefixes'] = []
-	
-	for key in conf['rename_reads']:
-		if not key.startswith('infolder_'):
-			continue
-		#found an infolder
-		res['rename_reads']['infolders'].append(conf['rename_reads'][key])
-		
-		#looking for the corresponding outfile_prefix
-		new_key = key.replace('infolder_', 'outfile_prefix_')
-		res['rename_reads']['outfile_prefixes'].append(conf['rename_reads'][new_key])
-		
-		#we can now remove those entries
-		res['rename_reads'].pop(key)
-		res['rename_reads'].pop(new_key)
 	
 	return(res)
 

@@ -7,7 +7,14 @@ import glob
 import os
 import common
 
-def subsample_validate(conf):
+def interpolate(conf, raw_conf):
+	'''transform incoming config parameters from .ini file'''
+	conf['subsample']['seed'] = int(conf['subsample']['seed']) 
+	conf['subsample']['reads'] = int(conf['subsample']['reads']) 
+	return(conf)
+
+def validate(conf):
+	'''validate incoming config parameters from .ini file'''
 	if conf['subsample']['tool'] not in ['cat', 'seqtk']:
 		msg = 'Config parameter subsample/tool must be in [cat, seqtk], found : ' + conf['subsample']['tool']  
 		raise ValueError(msg)
