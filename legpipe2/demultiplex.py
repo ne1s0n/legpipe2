@@ -8,8 +8,14 @@ import common
 
 def demultiplex_validate(conf):
 	#checking if files/paths exist
-	if not os.path.exists(conf['demultiplex']['infile_r1'])
+	if not os.path.exists(conf['demultiplex']['infile_r1']):
 		msg = 'Input file demultiplex/infile_r1 does not exist: ' + conf['demultiplex']['infile_r1']
+		raise FileNotFoundError(msg)
+	if not os.path.exists(conf['demultiplex']['infile_r2']):
+		msg = 'Input file demultiplex/infile_r2 does not exist: ' + conf['demultiplex']['infile_r2']
+		raise FileNotFoundError(msg)
+	if not os.path.exists(conf['demultiplex']['barcodes']):
+		msg = 'Input file demultiplex/barcodes does not exist: ' + conf['demultiplex']['barcodes']
 		raise FileNotFoundError(msg)
 
 def demultiplex(conf):
@@ -20,7 +26,8 @@ def demultiplex(conf):
 	BARCODES=conf['demultiplex']['barcodes']
 	OUTFOLDER=conf['demultiplex']['outfolder']
 	DEMUX_CMD=conf['demultiplex']['demux_cmd']
-	
+	DEMUX_PARAMS=conf['demultiplex']['demux_params']
+
 	#derived variables
 	STATS_FILE= OUTFOLDER + '/axe_stats.csv'
 	LOG_FILE= OUTFOLDER + '/axe_log.txt'
@@ -49,7 +56,7 @@ def demultiplex(conf):
 	print('\nNow demultiplexing with axe demux, paired end')
 	
 	#building the command
-	cmd = [DEMUX_CMD]
+	cmd = [DEMUX_CMD, DEMUX_PARAMS]
 	cmd += ['-f' , INFILE_R1]
 	cmd += ['-r' , INFILE_R2]
 	cmd += ['-F' , OUTFOLDER + '/']
@@ -59,6 +66,6 @@ def demultiplex(conf):
 	
 	print(cmd)
 
-	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(LOG_FILE, "w") as fp:
 		fp.write(res.stdout)

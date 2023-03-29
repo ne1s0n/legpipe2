@@ -22,4 +22,5 @@ Work in progress & not ready to run. Stay tuned.
 	- [optional?] Select SNPs based on parental scores (only applies to some mapping populations)
 	- [optional?] Remove cosegregating SNP markers
 - move all cmd invocation from string to array format so to sanitize spaces
-- mode all parameter interpolation in their respective modules
+- move all parameter interpolation in their respective modules
+- remove Shell=True from subprocess.run invocation
