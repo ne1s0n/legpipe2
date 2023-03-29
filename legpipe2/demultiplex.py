@@ -6,7 +6,8 @@ import glob
 import os
 import common
 
-def demultiplex_validate(conf):
+def validate(conf):
+	'''validate incoming config parameters from .ini file'''
 	#checking if files/paths exist
 	if not os.path.exists(conf['demultiplex']['infile_r1']):
 		msg = 'Input file demultiplex/infile_r1 does not exist: ' + conf['demultiplex']['infile_r1']
@@ -18,6 +19,13 @@ def demultiplex_validate(conf):
 		msg = 'Input file demultiplex/barcodes does not exist: ' + conf['demultiplex']['barcodes']
 		raise FileNotFoundError(msg)
 
+def interpolate(conf, raw_conf):
+	'''transform incoming config parameters from .ini file'''
+	#the command should be parsed to a list so that to separate the 
+	#actual command and the options
+	conf['demultiplex']['demux_cmd'] = conf['demultiplex']['demux_cmd'].split('\n')
+	return(conf)
+	
 def demultiplex(conf):
 	#local copies of configuration variables, to have a leaner code
 	RUN_THIS=conf['demultiplex']['run_this']
@@ -26,7 +34,6 @@ def demultiplex(conf):
 	BARCODES=conf['demultiplex']['barcodes']
 	OUTFOLDER=conf['demultiplex']['outfolder']
 	DEMUX_CMD=conf['demultiplex']['demux_cmd']
-	DEMUX_PARAMS=conf['demultiplex']['demux_params']
 
 	#derived variables
 	STATS_FILE= OUTFOLDER + '/axe_stats.csv'
@@ -56,15 +63,15 @@ def demultiplex(conf):
 	print('\nNow demultiplexing with axe demux, paired end')
 	
 	#building the command
-	cmd = [DEMUX_CMD, DEMUX_PARAMS]
-	cmd += ['-f' , INFILE_R1]
-	cmd += ['-r' , INFILE_R2]
-	cmd += ['-F' , OUTFOLDER + '/']
-	cmd += ['-R' , OUTFOLDER + '/']
-	cmd += ['-b' , BARCODES]
-	cmd += ['-t' , STATS_FILE]
+	cmd = DEMUX_CMD
+	cmd += ['-f', INFILE_R1]
+	cmd += ['-r', INFILE_R2]
+	cmd += ['-F', OUTFOLDER + '/']
+	cmd += ['-R', OUTFOLDER + '/']
+	cmd += ['-b', BARCODES]
+	cmd += ['-t', STATS_FILE]
 	
-	print(cmd)
+	print(' '.join(cmd))
 
 	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(LOG_FILE, "w") as fp:

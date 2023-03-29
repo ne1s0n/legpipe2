@@ -10,7 +10,7 @@
 
 import configparser
 import copy
-from demultiplex import demultiplex_validate
+import demultiplex
 from subsample import subsample_validate
 
 def read_config(infile):
@@ -39,10 +39,11 @@ def read_config(infile):
 	res = _interpolate_rename_reads(res, config)
 	res = _interpolate_subsample(res, config)
 	res = _interpolate_trim(res, config)
+	res = demultiplex.interpolate(res, config)
 	
 	#validating everything, look for invalid values
 	subsample_validate(res)
-	demultiplex_validate(res)
+	demultiplex.validate(res)
 	
 	return(res)
 
