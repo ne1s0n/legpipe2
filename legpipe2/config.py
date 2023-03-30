@@ -10,6 +10,7 @@
 
 import configparser
 import importlib
+import os
 
 def read_config(infile):
 	'''
@@ -17,6 +18,12 @@ def read_config(infile):
 	and not many keys, returns a dictionary
 	'''
 	
+	#check if file exists
+	if not os.path.exists(infile):
+		msg = 'Config file does not exist: ' + infile
+		raise FileNotFoundError(msg)
+	
+	#instantiate a configparser object
 	config = configparser.ConfigParser(interpolation = configparser.ExtendedInterpolation())
 	config.read(infile)
 	
