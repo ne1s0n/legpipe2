@@ -8,6 +8,7 @@ import glob
 import os
 import pandas as pd
 import sys
+import pickle
 #instead of basic Pool, for complicated reasons linked to shared memory
 #that would prevent pandas to be pickable, we use ThreadPool 
 from multiprocessing.pool import ThreadPool 
@@ -59,11 +60,15 @@ def _do_trim(infile_R1, outfolder, trim_cmd):
 	fn = _create_filenames(infile_R1, outfolder)
 	
 	#--------- fastp
-	cmd = trim_cmd
-	cmd += ' --in1 '  + fn['infile_R1']    + ' --in2 '  +  fn['infile_R2']
-	cmd += ' --out1 ' + fn['outfile_R1']   + ' --out2 ' +  fn['outfile_R2']
-	cmd += ' -j '     + fn['outfile_json'] + ' -h '     +  fn['outfile_html']
-	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	cmd = pickle.loads(trim_cmd)
+	cmd += ['--in1 '  + fn['infile_R1'],  '--in2 '  + fn['infile_R2']]
+	cmd += ['--out1 ' + fn['outfile_R1'], '--out2 ' + fn['outfile_R2']]
+	cmd += ['-j ' + fn['outfile_json']]
+	cmd += ['-h ' + fn['outfile_html']]
+	
+	print(cmd)
+	
+	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log'], "w") as fp:
 		fp.write(res.stdout)
 	
@@ -112,16 +117,13 @@ def trim(conf):
 		#the arguments for the current file. Column order is important,
 		#it should match the order for the parallel function, since 
 		#the arguments are passed as positionals. Since TRIM_CMD is
-		#itself a list we need a bit of pandas tweaking
-		#For details, see https://stackoverflow.com/questions/26483254/python-pandas-insert-list-into-a-cell
+		#itself a list we need to pickle it
 		args_now = pd.DataFrame({
 			'infile_R1' : [infile_R1], 
 			'outfolder' : [OUTFOLDER],
-			'trim_cmd'  : ['placeholder'] 
+			'trim_cmd'  : [pickle.dumps(TRIM_CMD)] 
 		})
-		args_now['trim_cmd'] = args_now['trim_cmd'].astype('object')
-		args_now.at[0, 'trim_cmd'] = TRIM_CMD
-		
+
 		#storing in a single df
 		args = pd.concat([args, args_now])
 
