@@ -14,12 +14,12 @@ def Legpipe2(infile):
 	conf = read_config(infile)
 	
 	#the pipeline steps
-	#demultiplex(conf)
-	#rename_reads(conf)
-	#subsample(conf)
-	#trim(conf)
+	demultiplex(conf)
+	rename_reads(conf)
+	subsample(conf)
+	trim(conf)
 	
-	print(conf)
+	#print(conf['rename_reads'])
 	
 	#done
 	return(conf)

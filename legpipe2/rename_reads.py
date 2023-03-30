@@ -37,20 +37,20 @@ def interpolate(conf, raw_conf):
 	return(res)
 
 def rename_reads(conf):
-	#local copies of configuration variables, to have a leaner code
-	INFOLDERS=conf['rename_reads']['infolders'] #where is the original data
-	OUTFILE_PREFIXES=conf['rename_reads']['outfile_prefixes'] #prepend to each fastq
-	OUTFOLDER=conf['rename_reads']['outfolder']
-	RUN_THIS=conf['rename_reads']['run_this']
-	
 	#interface
 	common.print_step_header('rename_reads')
 	
 	#should we do something?
+	RUN_THIS=conf['rename_reads']['run_this']
 	if not RUN_THIS:
 		print('SKIPPED')
 		return(None)
 
+	#local copies of configuration variables, to have a leaner code
+	INFOLDERS=conf['rename_reads']['infolders'] #where is the original data
+	OUTFILE_PREFIXES=conf['rename_reads']['outfile_prefixes'] #prepend to each fastq
+	OUTFOLDER=conf['rename_reads']['outfolder']
+	
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
 	subprocess.run(cmd_str, shell=True)

@@ -24,25 +24,25 @@ def interpolate(conf, raw_conf):
 	return(conf)
 	
 def demultiplex(conf):
-	#local copies of configuration variables, to have a leaner code
-	RUN_THIS=conf['demultiplex']['run_this']
-	INFILE_R1=conf['demultiplex']['infile_r1'] # multiplexed data, reads 1
-	INFILE_R2=conf['demultiplex']['infile_r2'] # multiplexed data, reads 2
-	BARCODES=conf['demultiplex']['barcodes']
-	OUTFOLDER=conf['demultiplex']['outfolder']
-	DEMUX_CMD=conf['demultiplex']['demux_cmd']
-
-	#derived variables
-	STATS_FILE= OUTFOLDER + '/axe_stats.csv'
-	LOG_FILE= OUTFOLDER + '/axe_log.txt'
-	
 	#interface
 	common.print_step_header('demultiplex')
 	
 	#should we do something?
+	RUN_THIS=conf['demultiplex']['run_this']
 	if not RUN_THIS:
 		print('SKIPPED')
 		return(None)
+
+	#local copies of configuration variables, to have a leaner code
+	INFILE_R1=conf['demultiplex']['infile_r1'] # multiplexed data, reads 1
+	INFILE_R2=conf['demultiplex']['infile_r2'] # multiplexed data, reads 2
+	BARCODES=conf['demultiplex']['barcodes']
+	OUTFOLDER=conf['demultiplex']['outfolder']
+	DEMUX_CMD=conf['demultiplex']['cmd']
+
+	#derived variables
+	STATS_FILE= OUTFOLDER + '/axe_stats.csv'
+	LOG_FILE= OUTFOLDER + '/axe_log.txt'
 
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER

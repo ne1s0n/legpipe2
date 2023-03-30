@@ -72,6 +72,14 @@ def _do_trim(infile_R1, outfolder, trim_cmd):
 
 #----------- MAIN FUNCTION
 def trim(conf):
+	#interface
+	common.print_step_header('trim')
+	
+	#should we do something?
+	RUN_THIS=conf['trim']['run_this']
+	if not RUN_THIS:
+		print('SKIPPED')
+		return(None)
 
 	#----------- config
 	INFOLDER=conf['trim']['infolder']
@@ -84,18 +92,8 @@ def trim(conf):
 	MAX_SAMPLES=conf['trim']['max_samples']
 	#if TRUE samples already processed will be skipped
 	SKIP_PREVIOUSLY_COMPLETED=conf['trim']['skip_previously_completed']
-	RUN_THIS=conf['trim']['run_this']
 	#the actual trim command
-	TRIM_CMD=conf['trim']['trim_cmd']
-
-	#interface
-	common.print_step_header('trim')
-	
-	#should we do something?
-	if not RUN_THIS:
-		print('SKIPPED')
-		return(None)
-
+	TRIM_CMD=conf['trim']['cmd']
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
 	subprocess.run(cmd_str, shell=True)

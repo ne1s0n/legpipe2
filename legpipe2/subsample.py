@@ -20,6 +20,16 @@ def validate(conf):
 		raise ValueError(msg)
 		
 def subsample(conf):
+
+	#interface
+	common.print_step_header('subsample')
+	
+	#should we do something?
+	RUN_THIS=conf['subsample']['run_this']
+	if not RUN_THIS:
+		print('SKIPPED')
+		return(None)
+
 	#basic folder
 	INFOLDER=conf['subsample']['infolder']
 	OUTFOLDER=conf['subsample']['outfolder']
@@ -29,15 +39,6 @@ def subsample(conf):
 	READS=conf['subsample']['reads']
 	#tool to be used
 	TOOL=conf['subsample']['tool']
-	RUN_THIS=conf['subsample']['run_this']
-
-	#interface
-	common.print_step_header('subsample')
-	
-	#should we do something?
-	if not RUN_THIS:
-		print('SKIPPED')
-		return(None)
 
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
