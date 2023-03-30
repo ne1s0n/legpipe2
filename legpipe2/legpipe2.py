@@ -8,6 +8,7 @@ from rename_reads import rename_reads
 from subsample import subsample
 from trim import trim
 from demultiplex import demultiplex
+from genome_index import genome_index
 
 def Legpipe2(infile):
 	#reading the config in
@@ -20,7 +21,7 @@ def Legpipe2(infile):
 	rename_reads(conf)
 	subsample(conf)
 	trim(conf)
-	
+	genome_index(conf)
 	
 	#done
 	return(conf)
