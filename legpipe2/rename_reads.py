@@ -7,6 +7,9 @@ import os
 import common
 import copy
 
+def validate(conf):
+	'''validate incoming config parameters from .ini file'''
+
 def interpolate(conf, raw_conf):
 	'''two groups of values should become lists with the same internal order
 		- INFOLDER_X (e.g. INFOLDER_1, INFOLDER_2, ...)

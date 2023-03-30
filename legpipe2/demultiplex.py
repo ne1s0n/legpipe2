@@ -21,9 +21,6 @@ def validate(conf):
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
-	#the command should be parsed to a list so that to separate the 
-	#actual command and the options
-	conf['demultiplex']['demux_cmd'] = conf['demultiplex']['demux_cmd'].split('\n')
 	return(conf)
 	
 def demultiplex(conf):

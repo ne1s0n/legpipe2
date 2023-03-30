@@ -28,6 +28,11 @@ def interpolate(conf, raw_conf):
 		conf['trim']['max_samples'] = float('inf')
 	
 	return(conf)
+	
+def validate(conf):
+	'''validate incoming config parameters from .ini file'''
+	return(conf)
+
 
 def _create_filenames(infile_R1, outfolder):
 	'''returns a dictionary with all the filenames derived from the input R1
@@ -110,12 +115,16 @@ def trim(conf):
 		
 		#the arguments for the current file. Column order is important,
 		#it should match the order for the parallel function, since 
-		#the arguments are passed as positionals
+		#the arguments are passed as positionals. Since TRIM_CMD is
+		#itself a list we need a bit of pandas tweaking
+		#For details, see https://stackoverflow.com/questions/26483254/python-pandas-insert-list-into-a-cell
 		args_now = pd.DataFrame({
 			'infile_R1' : [infile_R1], 
 			'outfolder' : [OUTFOLDER],
-			'trim_cmd'  : [TRIM_CMD] 
+			'trim_cmd'  : ['placeholder'] 
 		})
+		args_now['trim_cmd'] = args_now['trim_cmd'].astype('object')
+		args_now.at[0, 'trim_cmd'] = TRIM_CMD
 		
 		#storing in a single df
 		args = pd.concat([args, args_now])

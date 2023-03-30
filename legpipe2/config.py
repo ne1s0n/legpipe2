@@ -9,6 +9,8 @@
 #native interpolation/validation mechanisms
 
 import configparser
+import importlib
+
 import subsample
 import trim
 import rename_reads
@@ -28,23 +30,22 @@ def read_config(infile):
 	for section in config.sections():
 		res[section] = {}
 		for key in config[section]:
-			#this value is common to every section and we interpolate it on the fly
+			#some on-the-fly interpolations for common values in all sections
 			if key == 'run_this':
 				res[section][key] = config[section].getboolean(key)	
+			elif key == 'cmd':
+				res[section][key] = config[section][key].split('\n')
 			else:
 				#just copying the value
 				res[section][key] = config[section][key]
 	
-	#interpolating some special cases (e.g. 
-	#values that should actually be integer or lists)
-	res = rename_reads.interpolate(res, config)
-	res = subsample.interpolate(res, config)
-	res = trim.interpolate(res, config)
-	res = demultiplex.interpolate(res, config)
-	
-	#validating everything, look for invalid values
-	subsample.validate(res)
-	demultiplex.validate(res)
+	#sections correspond to modules (e.g. operations)
+	for m in config.sections():
+		#should we import/interpolate/validate?
+		if res[m]['run_this']:
+			mymodule = importlib.import_module(m)
+			mymodule.interpolate(res, config)
+			mymodule.validate(res)
 	
 	return(res)
 
