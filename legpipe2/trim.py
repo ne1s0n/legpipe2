@@ -61,10 +61,10 @@ def _do_trim(infile_R1, outfolder, trim_cmd):
 	
 	#--------- fastp
 	cmd = pickle.loads(trim_cmd)
-	cmd += ['--in1 '  + fn['infile_R1'],  '--in2 '  + fn['infile_R2']]
-	cmd += ['--out1 ' + fn['outfile_R1'], '--out2 ' + fn['outfile_R2']]
-	cmd += ['-j ' + fn['outfile_json']]
-	cmd += ['-h ' + fn['outfile_html']]
+	cmd += ['--in1' , fn['infile_R1'],  '--in2'  , fn['infile_R2']]
+	cmd += ['--out1', fn['outfile_R1'], '--out2' , fn['outfile_R2']]
+	cmd += ['-j' , fn['outfile_json']]
+	cmd += ['-h' , fn['outfile_html']]
 	
 	print(cmd)
 	
