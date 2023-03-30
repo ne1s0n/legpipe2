@@ -31,8 +31,6 @@ def interpolate(conf, raw_conf):
 	
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
-	return(conf)
-
 
 def _create_filenames(infile_R1, outfolder):
 	'''returns a dictionary with all the filenames derived from the input R1

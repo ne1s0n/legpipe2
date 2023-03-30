@@ -11,11 +11,6 @@
 import configparser
 import importlib
 
-import subsample
-import trim
-import rename_reads
-import demultiplex
-
 def read_config(infile):
 	'''
 	Reads the config file in .ini format, parse some data so e.g. there's lists
@@ -44,7 +39,7 @@ def read_config(infile):
 		#should we import/interpolate/validate?
 		if res[m]['run_this']:
 			mymodule = importlib.import_module(m)
-			mymodule.interpolate(res, config)
+			res = mymodule.interpolate(res, config)
 			mymodule.validate(res)
 	
 	return(res)
