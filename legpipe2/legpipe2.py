@@ -22,6 +22,7 @@ def Legpipe2(infile):
 	subsample(conf)
 	trim(conf)
 	genome_index(conf)
+	align(conf)
 	
 	#done
 	return(conf)
