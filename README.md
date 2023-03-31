@@ -14,7 +14,9 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
-- update cmd invocation to support extra arguments, following demultiplex module example
+- implement test for required, installed software (maybe module based? like what
+  is done for `interpolate()` and `validate()` functions)
+- test align module
 - implement SNP calling module
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)
