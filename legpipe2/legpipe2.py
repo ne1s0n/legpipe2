@@ -14,8 +14,6 @@ def Legpipe2(infile):
 	#reading the config in
 	conf = read_config(infile)
 	
-	#print(conf['demultiplex'])
-	
 	#the pipeline steps
 	demultiplex(conf)
 	rename_reads(conf)
@@ -23,6 +21,7 @@ def Legpipe2(infile):
 	trim(conf)
 	genome_index(conf)
 	align(conf)
+	call(conf)
 	
 	#done
 	return(conf)
