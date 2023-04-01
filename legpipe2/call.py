@@ -18,6 +18,10 @@ def interpolate(conf, raw_conf):
 	#these values should be int
 	conf['call']['ploidy'] = raw_conf['call'].getint('ploidy') 
 
+	#if max_samples is zero it goes to +Infinity
+	conf['call']['max_samples'] = raw_conf['call'].getint('max_samples')
+	if conf['call']['max_samples'] == 0:
+		conf['call']['max_samples'] = float('inf')
 	return(conf)
 
 #----------- CALL (public) FUNCTION
@@ -36,6 +40,7 @@ def call(conf):
 	OUTFOLDER=conf['call']['outfolder']
 	REFERENCE_FILE=conf['call']['reference_file']
 	PLOIDY=conf['call']['ploidy']
+	MAX_SAMPLES=conf['call']['max_samples']
 	EXPERIMENT=conf['call']['experiment']
 	TMP_FOLDER=conf['call']['tmp_folder']
 
@@ -70,12 +75,15 @@ def call(conf):
 		
 		cmd = ['gatk', '--java-options', '"-Xmx4g"', 'HaplotypeCaller']
 		cmd += ['-ERC', 'GVCF', '--min-pruning', '1', '-stand-call-conf', '30'] 
-		cmd += ['-ploidy', 'str(PLOIDY)'] 
+		cmd += ['-ploidy', str(PLOIDY)] 
 		cmd += ['-R', REFERENCE_FILE]
-		cmd += ['-I',  infile]
-		cmd += ['-O',  gvcf]
+		cmd += ['-I', infile]
+		cmd += ['-O', gvcf]
 		print(cmd)
 		subprocess.run(cmd, shell=True)
+		
+		if len(gvcf_list) >= MAX_SAMPLES:
+			break
 
 	#------------ GenomicsDBImport
 	#import everything in a genomic db
