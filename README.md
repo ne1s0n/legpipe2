@@ -14,10 +14,10 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
-- implement test for required, installed software (maybe module based? like what
+- implement test for required software (maybe module based? like what
   is done for `interpolate()` and `validate()` functions)
-- test align module
-- implement SNP calling module
+- test align, SNP calling  modules
+- parallelize SNP calling module 
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)
 	- [optional?] Remove adjacent SNPs
