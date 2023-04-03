@@ -47,6 +47,7 @@ def call(conf):
 	MAX_SAMPLES=conf['call']['max_samples']
 	EXPERIMENT=conf['call']['experiment']
 	TMP_FOLDER=conf['call']['tmp_folder']
+	SKIP_PREVIOUSLY_COMPLETED=conf['call']['skip_previously_completed']
 
 	#a subfolder for GATK gvcf files
 	OUTFOLDER_GVCF = OUTFOLDER + '/GVCF'
