@@ -81,6 +81,7 @@ def call(conf):
 		cmd += ['-I', infile]
 		cmd += ['-O', gvcf]
 		print(cmd)
+		print(' '.join(cmd))
 		subprocess.run(cmd, shell=True)
 		
 		if len(gvcf_list) >= MAX_SAMPLES:
