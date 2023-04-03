@@ -117,6 +117,7 @@ def call(conf):
 		cmd += ['-V', g]
 	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
 	cmd += ['--tmp-dir', TMP_FOLDER]
+	print(' '.join(cmd))
 	if DRY_RUN:
 		cmd += ['--dry-run']
 	subprocess.run(cmd, shell=True)
@@ -138,7 +139,7 @@ def call(conf):
 	cmd += ['--tmp-dir' + TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	subprocess.run(cmd, shell=True)
+	#subprocess.run(cmd, shell=True)
 
 	#closing interface
 	print('Samples: ')
