@@ -13,13 +13,14 @@ def validate(conf):
 	if not os.path.exists(conf['call']['reference_file']):
 		msg = 'Reference file does not exist: ' + conf['genome_index']['reference_file']
 		raise FileNotFoundError(msg)
-	#these values should be boolean
-	conf['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#these values should be int
 	conf['call']['ploidy'] = raw_conf['call'].getint('ploidy') 
+
+	#these values should be boolean
+	conf['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
 
 	#if max_samples is zero it goes to +Infinity
 	conf['call']['max_samples'] = raw_conf['call'].getint('max_samples')
