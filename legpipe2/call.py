@@ -13,6 +13,8 @@ def validate(conf):
 	if not os.path.exists(conf['call']['reference_file']):
 		msg = 'Reference file does not exist: ' + conf['genome_index']['reference_file']
 		raise FileNotFoundError(msg)
+	#these values should be boolean
+	conf['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -56,14 +58,21 @@ def call(conf):
 
 	#keeping track of the produced .g.vcf.gz files
 	gvcf_list = []
+	skipped = 0
 
 	#------------ HaplotypeCaller
 	#for each input bam
 	for infile in glob.glob(INFOLDER + '/*.gr.sorted.bam'):
 		#the produced gvcf file, log
 		gvcf = OUTFOLDER_GVCF + '/' + os.path.basename(infile).replace('.gr.sorted.bam', '.g.vcf.gz')
-		gvcf_list.append(gvcf)
 		gvcf_log = OUTFOLDER_GVCF + '/' + os.path.basename(infile).replace('.gr.sorted.bam', '.log')
+		gvcf_list.append(gvcf)
+		
+		#should we skip this file?
+		if os.path.isfile(gvcf) and SKIP_PREVIOUSLY_COMPLETED:
+			skipped += 1
+			print('Skipping previously processed sample ' + gvcf)
+			continue
 		
 		#https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
 		#gatk --java-options "-Xmx4g" HaplotypeCaller  \
@@ -87,7 +96,7 @@ def call(conf):
 		with open(gvcf_log, "w") as fp:
 			fp.write(res.stdout)
 		
-		if len(gvcf_list) >= MAX_SAMPLES:
+		if len(gvcf_list) - skipped >= MAX_SAMPLES:
 			break
 
 	#------------ GenomicsDBImport
@@ -125,3 +134,8 @@ def call(conf):
 	cmd += ['--tmp-dir' + TMP_FOLDER]
 	print(cmd)
 	subprocess.run(cmd, shell=True)
+
+	#closing interface
+	print('Samples: ')
+	print(' - joint called: ' + str(cnt))
+	print(' - of which, inherited from previous runs: ' + str(skipped))
