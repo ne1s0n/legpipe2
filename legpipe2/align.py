@@ -15,10 +15,10 @@ import subprocess
 import glob
 import os
 import pandas as pd
+import common
 #instead of basic Pool, for complicated reasons linked to shared memory
 #that would prevent pandas to be pickable, we use ThreadPool 
 from multiprocessing.pool import ThreadPool 
-
 
 #----------- SUPPORT FUNCTIONS
 def validate(conf):

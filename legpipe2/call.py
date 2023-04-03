@@ -5,6 +5,7 @@
 import subprocess
 import glob
 import os
+import common
 
 #----------- SUPPORT FUNCTIONS
 def validate(conf):
