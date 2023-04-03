@@ -117,10 +117,10 @@ def call(conf):
 		cmd += ['-V', g]
 	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
 	cmd += ['--tmp-dir', TMP_FOLDER]
-	print(' '.join(cmd))
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	subprocess.run(cmd, shell=True)
+	#print(' '.join(cmd))
+	#subprocess.run(cmd, shell=True)
 
 	#------------ GenotypeGVCFs
 	#joint variant calling
@@ -131,8 +131,7 @@ def call(conf):
 	#   -V gendb://my_database \
 	#   -O output.vcf.gz \
 	#   --tmp-dir /path/to/large/tmp
-	#cmd = ['gatk', '--java-options', '-Xmx4g', 'GenotypeGVCFs']
-	cmd = ['gatk', 'GenotypeGVCFs']
+	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenotypeGVCFs']
 	cmd += ['-ploidy', str(PLOIDY)] 
 	cmd += ['-R',  REFERENCE_FILE] 
 	cmd += ['-V',  'gendb://' + EXPERIMENT]
