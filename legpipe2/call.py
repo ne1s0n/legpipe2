@@ -60,9 +60,10 @@ def call(conf):
 	#------------ HaplotypeCaller
 	#for each input bam
 	for infile in glob.glob(INFOLDER + '/*.gr.sorted.bam'):
-		#the produced gvcf file
+		#the produced gvcf file, log
 		gvcf = OUTFOLDER_GVCF + '/' + os.path.basename(infile).replace('.gr.sorted.bam', '.g.vcf.gz')
 		gvcf_list.append(gvcf)
+		gvcf_log = OUTFOLDER_GVCF + '/' + os.path.basename(infile).replace('.gr.sorted.bam', '.log')
 		
 		#https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
 		#gatk --java-options "-Xmx4g" HaplotypeCaller  \
@@ -82,7 +83,9 @@ def call(conf):
 		cmd += ['-O', gvcf]
 		print(cmd)
 		print(' '.join(cmd))
-		subprocess.run(cmd, shell=True)
+		res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+		with open(gvcf_log, "w") as fp:
+			fp.write(res.stdout)
 		
 		if len(gvcf_list) >= MAX_SAMPLES:
 			break
