@@ -139,5 +139,5 @@ def call(conf):
 
 	#closing interface
 	print('Samples: ')
-	print(' - joint called: ' + str(cnt))
+	print(' - joint called: ' + str(len(gvcf_list)))
 	print(' - of which, inherited from previous runs: ' + str(skipped))
