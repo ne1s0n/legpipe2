@@ -86,7 +86,8 @@ def call(conf):
 		#   --min-pruning 1 #default is two \
 		#   -stand-call-conf 30 #default 
 		
-		cmd = ['gatk', '--java-options', '"-Xmx4g"', 'HaplotypeCaller']
+		#cmd = ['gatk', '--java-options', '"-Xmx4g"', 'HaplotypeCaller']
+		cmd = ['gatk', 'HaplotypeCaller']
 		cmd += ['-ERC', 'GVCF', '--min-pruning', '1', '-stand-call-conf', '30'] 
 		cmd += ['-ploidy', str(PLOIDY)] 
 		cmd += ['-R', REFERENCE_FILE]
