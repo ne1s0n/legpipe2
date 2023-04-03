@@ -119,8 +119,7 @@ def call(conf):
 	cmd += ['--tmp-dir', TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-
-	subprocess.run(cmd, shell=True)
+	#subprocess.run(cmd, shell=True)
 
 	#------------ GenotypeGVCFs
 	#joint variant calling
@@ -137,10 +136,9 @@ def call(conf):
 	cmd += ['-V',  'gendb://' + EXPERIMENT]
 	cmd += ['-O',  OUTFOLDER + '/raw_SNPs_haplo.vcf.gz']
 	cmd += ['--tmp-dir' + TMP_FOLDER]
-	subprocess.run(cmd, shell=True)
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	
+	#subprocess.run(cmd, shell=True)
 
 	#closing interface
 	print('Samples: ')
