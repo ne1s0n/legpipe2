@@ -21,6 +21,7 @@ def interpolate(conf, raw_conf):
 
 	#these values should be boolean
 	conf['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
+	conf['call']['dry_run'] = raw_conf['call'].getboolean('dry_run') 
 
 	#if max_samples is zero it goes to +Infinity
 	conf['call']['max_samples'] = raw_conf['call'].getint('max_samples')
@@ -48,6 +49,7 @@ def call(conf):
 	EXPERIMENT=conf['call']['experiment']
 	TMP_FOLDER=conf['call']['tmp_folder']
 	SKIP_PREVIOUSLY_COMPLETED=conf['call']['skip_previously_completed']
+	DRY_RUN=conf['call']['dry_run']
 
 	#a subfolder for GATK gvcf files
 	OUTFOLDER_GVCF = OUTFOLDER + '/GVCF'
@@ -92,8 +94,8 @@ def call(conf):
 		cmd += ['-R', REFERENCE_FILE]
 		cmd += ['-I', infile]
 		cmd += ['-O', gvcf]
-		print(cmd)
-		print(' '.join(cmd))
+		if DRY_RUN:
+			cmd += ['--dry-run']
 		res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 		with open(gvcf_log, "w") as fp:
 			fp.write(res.stdout)
@@ -115,8 +117,9 @@ def call(conf):
 		cmd += ['-V', g]
 	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
 	cmd += ['--tmp-dir', TMP_FOLDER]
+	if DRY_RUN:
+		cmd += ['--dry-run']
 
-	print(cmd)
 	subprocess.run(cmd, shell=True)
 
 	#------------ GenotypeGVCFs
@@ -134,8 +137,10 @@ def call(conf):
 	cmd += ['-V',  'gendb://' + EXPERIMENT]
 	cmd += ['-O',  OUTFOLDER + '/raw_SNPs_haplo.vcf.gz']
 	cmd += ['--tmp-dir' + TMP_FOLDER]
-	print(cmd)
 	subprocess.run(cmd, shell=True)
+	if DRY_RUN:
+		cmd += ['--dry-run']
+	
 
 	#closing interface
 	print('Samples: ')
