@@ -131,7 +131,8 @@ def call(conf):
 	#   -V gendb://my_database \
 	#   -O output.vcf.gz \
 	#   --tmp-dir /path/to/large/tmp
-	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenotypeGVCFs']
+	#cmd = ['gatk', '--java-options', '-Xmx4g', 'GenotypeGVCFs']
+	cmd = ['gatk', 'GenotypeGVCFs']
 	cmd += ['-ploidy', str(PLOIDY)] 
 	cmd += ['-R',  REFERENCE_FILE] 
 	cmd += ['-V',  'gendb://' + EXPERIMENT]
