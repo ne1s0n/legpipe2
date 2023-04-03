@@ -18,6 +18,7 @@ def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#these values should be int
 	conf['call']['ploidy'] = raw_conf['call'].getint('ploidy') 
+	conf['call']['cores'] = raw_conf['call'].getint('cores') 
 
 	#these values should be boolean
 	conf['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
@@ -45,6 +46,7 @@ def call(conf):
 	OUTFOLDER=conf['call']['outfolder']
 	REFERENCE_FILE=conf['call']['reference_file']
 	PLOIDY=conf['call']['ploidy']
+	CORES=conf['call']['cores']
 	MAX_SAMPLES=conf['call']['max_samples']
 	EXPERIMENT=conf['call']['experiment']
 	TMP_FOLDER=conf['call']['tmp_folder']
@@ -91,6 +93,7 @@ def call(conf):
 		cmd = ['gatk', '--java-options', '-Xmx4g', 'HaplotypeCaller']
 		cmd += ['-ERC', 'GVCF', '--min-pruning', '1', '-stand-call-conf', '30'] 
 		cmd += ['-ploidy', str(PLOIDY)] 
+		cmd += ['--native-pair-hmm-threads', str(CORES)]
 		cmd += ['-R', REFERENCE_FILE]
 		cmd += ['-I', infile]
 		cmd += ['-O', gvcf]
