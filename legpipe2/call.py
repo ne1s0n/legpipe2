@@ -18,22 +18,40 @@ def validate(conf):
 	if not os.path.exists(conf['call']['reference_file']):
 		msg = 'Reference file does not exist: ' + conf['genome_index']['reference_file']
 		raise FileNotFoundError(msg)
+	
+	if len(conf['call']['regions']) == 0:
+		msg = 'At least one genomic region is required in the form region:start-end'
+		raise ValueError(msg)
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
+	
+	#an editable copy of the dictionary, so that we can manipulate while iterating
+	res = copy.deepcopy(conf)
+
 	#these values should be int
-	conf['call']['ploidy'] = raw_conf['call'].getint('ploidy') 
-	conf['call']['cores'] = raw_conf['call'].getint('cores') 
+	res['call']['ploidy'] = raw_conf['call'].getint('ploidy') 
+	res['call']['cores'] = raw_conf['call'].getint('cores') 
 
 	#these values should be boolean
-	conf['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
-	conf['call']['dry_run'] = raw_conf['call'].getboolean('dry_run') 
+	res['call']['skip_previously_completed'] = raw_conf['call'].getboolean('skip_previously_completed') 
+	res['call']['dry_run'] = raw_conf['call'].getboolean('dry_run') 
 
 	#if max_samples is zero it goes to +Infinity
-	conf['call']['max_samples'] = raw_conf['call'].getint('max_samples')
-	if conf['call']['max_samples'] == 0:
-		conf['call']['max_samples'] = float('inf')
-	return(conf)
+	res['call']['max_samples'] = raw_conf['call'].getint('max_samples')
+	if res['call']['max_samples'] == 0:
+		res['call']['max_samples'] = float('inf')
+	
+	#regions to be called on
+	res['call']['regions'] = []
+	for key in conf['call']:
+		if not key.startswith('region_'):
+			continue
+		#found a region, putting it in the array and cleaning up the single value
+		res['call']['regions'].append(conf['call'][key])
+		res['call'].pop(key)
+	
+	return(res)
 
 def _create_filenames(sorted_bam, outfolder):
 	'''returns a dictionary with all the derived filenames/folders'''
@@ -183,9 +201,9 @@ def call(conf):
 	cmd += ['--tmp-dir', TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	with open(fn['GenomicsDBImport_log'], "w") as fp:
-		fp.write(res.stdout)
+	#res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	#with open(fn['GenomicsDBImport_log'], "w") as fp:
+	#	fp.write(res.stdout)
 
 	#------------ GenotypeGVCFs
 	#interface
