@@ -7,6 +7,7 @@ import glob
 import os
 import common
 import pandas as pd
+import copy
 #instead of basic Pool, for complicated reasons linked to shared memory
 #that would prevent pandas to be pickable, we use ThreadPool 
 from multiprocessing.pool import ThreadPool 
