@@ -17,10 +17,11 @@ Work in progress & not ready to run. Stay tuned.
 - implement test for required software (maybe module based? like what
   is done for `interpolate()` and `validate()` functions)
 - test align module
-- parallelize SNP calling module (HaplotypeCaller step), since '--native-pair-hmm-threads' option only accounts for a very, very minor part of the computation
+- implement post-execution script (for synch, shutdown...)
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)
 	- [optional?] Remove adjacent SNPs
 	- [optional?] Consolidate SNPs
 	- [optional?] Select SNPs based on parental scores (only applies to some mapping populations)
 	- [optional?] Remove cosegregating SNP markers
+
