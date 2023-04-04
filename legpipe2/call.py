@@ -47,8 +47,8 @@ def _create_filenames(sorted_bam, outfolder):
 	res['core'] = os.path.basename(sorted_bam).replace('.gr.sorted.bam', '')
 	
 	#output files
-	res['gvcf']     = outfolder_GVCF + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.g.vcf.gz')
-	res['gvcf_log'] = outfolder_GVCF + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.log')
+	res['gvcf']     = res['outfolder_GVCF'] + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.g.vcf.gz')
+	res['gvcf_log'] = res['outfolder_GVCF'] + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.log')
 	res['GenomicsDBImport_log'] = outfolder + '/GenomicsDBImport.log'
 	res['GenotypeGVCFs_log'] = outfolder + '/GenotypeGVCFs.log'
 	
