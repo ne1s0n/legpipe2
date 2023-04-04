@@ -14,6 +14,7 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
+- genomicDBimport requires a precise list of intervals, it should probably migrate to its own module
 - implement test for required software (maybe module based? like what
   is done for `interpolate()` and `validate()` functions)
 - test align module
