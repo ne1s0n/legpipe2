@@ -122,7 +122,7 @@ def call(conf):
 		gvcf_list.append(fn['gvcf'])
 		
 		#should we skip this file?
-		if os.path.isfile(gvcf) and SKIP_PREVIOUSLY_COMPLETED:
+		if os.path.isfile(fn['gvcf']) and SKIP_PREVIOUSLY_COMPLETED:
 			skipped += 1
 			print('Skipping previously processed sample ' + fn['gvcf'])
 			continue
