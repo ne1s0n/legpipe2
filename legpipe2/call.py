@@ -41,17 +41,18 @@ def _create_filenames(sorted_bam, outfolder):
 	#storing the input data, just for the record
 	res = {'sorted_bam' : sorted_bam}
 	res = {'outfolder' : outfolder}
+	res = {'outfolder_GVCF' : outfolder + '/GVCF'}
 	
 	#core sample name, without path and file extension
 	res['core'] = os.path.basename(sorted_bam).replace('.gr.sorted.bam', '')
 	
 	#output files
-	res['gvcf']     = outfolder + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.g.vcf.gz')
-	res['gvcf_log'] = outfolder + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.log')
-
+	res['gvcf']     = outfolder_GVCF + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.g.vcf.gz')
+	res['gvcf_log'] = outfolder_GVCF + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.log')
+	res['GenomicsDBImport_log'] = outfolder + '/GenomicsDBImport.log'
+	res['GenotypeGVCFs_log'] = outfolder + '/GenotypeGVCFs.log'
+	
 	return(res)
-
-
 
 def _haplotypecaller(ploidy, reference_file, infile, outfile, logfile, dry_run):
 	#https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
@@ -96,12 +97,7 @@ def call(conf):
 	SKIP_PREVIOUSLY_COMPLETED=conf['call']['skip_previously_completed']
 	DRY_RUN=conf['call']['dry_run']
 
-	#a subfolder for GATK gvcf files
-	OUTFOLDER_GVCF = OUTFOLDER + '/GVCF'
-
-	#room for output, tmp
-	cmd = "mkdir -p " + OUTFOLDER_GVCF
-	subprocess.run(cmd, shell=True)
+	#tmp folder
 	cmd = "mkdir -p " + TMP_FOLDER
 	subprocess.run(cmd, shell=True)
 
@@ -117,9 +113,13 @@ def call(conf):
 	common.print_step_header('call SNPs - HaplotypeCaller')
 	#for each input bam
 	for infile in glob.glob(INFOLDER + '/*.gr.sorted.bam'):
-		#the produced gvcf file, log
+		#the produced gvcf files, logs
 		fn = _create_filenames(infile, OUTFOLDER)
 		gvcf_list.append(fn['gvcf'])
+		
+		#room for result
+		cmd = "mkdir -p " + fn['outfolder_GVCF']
+		subprocess.run(cmd, shell=True)
 		
 		#should we skip this file?
 		if os.path.isfile(fn['gvcf']) and SKIP_PREVIOUSLY_COMPLETED:
@@ -164,6 +164,10 @@ def call(conf):
 	#------------ GenomicsDBImport
 	#interface
 	common.print_step_header('call SNPs - GenomicsDBImport')
+	
+	#a mock names dictionary, so that we have the common reference to log files
+	fn = _create_filenames('/path/to/fakesample.bam', OUTFOLDER)
+	
 	#import everything in a genomic db
 	#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
 	#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
@@ -179,7 +183,9 @@ def call(conf):
 	cmd += ['--tmp-dir', TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	subprocess.run(cmd, text=True)
+	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	with open(fn['GenomicsDBImport_log'], "w") as fp:
+		fp.write(res.stdout)
 
 	#------------ GenotypeGVCFs
 	#interface
@@ -200,6 +206,9 @@ def call(conf):
 	cmd += ['--tmp-dir' + TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	subprocess.run(cmd, text=True)
+	#res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	#with open(fn['GenotypeGVCFs_log'], "w") as fp:
+	#	fp.write(res.stdout)
+
 
 
