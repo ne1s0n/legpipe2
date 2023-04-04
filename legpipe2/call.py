@@ -6,6 +6,11 @@ import subprocess
 import glob
 import os
 import common
+import pandas as pd
+#instead of basic Pool, for complicated reasons linked to shared memory
+#that would prevent pandas to be pickable, we use ThreadPool 
+from multiprocessing.pool import ThreadPool 
+
 
 #----------- SUPPORT FUNCTIONS
 def validate(conf):
@@ -30,10 +35,48 @@ def interpolate(conf, raw_conf):
 		conf['call']['max_samples'] = float('inf')
 	return(conf)
 
+def _create_filenames(sorted_bam, outfolder):
+	'''returns a dictionary with all the derived filenames/folders'''
+	
+	#storing the input data, just for the record
+	res = {'sorted_bam' : sorted_bam}
+	res = {'outfolder' : outfolder}
+	
+	#core sample name, without path and file extension
+	res['core'] = os.path.basename(sorted_bam).replace('.gr.sorted.bam', '')
+	
+	#output files
+	res['gvcf']     = outfolder + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.g.vcf.gz')
+	res['gvcf_log'] = outfolder + '/' + os.path.basename(sorted_bam).replace('.gr.sorted.bam', '.log')
+
+	return(res)
+
+
+
+def _haplotypecaller(ploidy, reference_file, infile, outfile, logfile, dry_run):
+	#https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
+	#gatk --java-options "-Xmx4g" HaplotypeCaller  \
+	#   -R Homo_sapiens_assembly38.fasta \
+	#   -I input.bam \
+	#   -O output.g.vcf.gz \
+	#   -ERC GVCF \
+	#   -ploidy PLOIDY \
+	#   --min-pruning 1 #default is two \
+	#   -stand-call-conf 30 #default 
+	cmd = ['gatk', '--java-options', '-Xmx4g', 'HaplotypeCaller']
+	cmd += ['-ERC', 'GVCF', '--min-pruning', '1', '-stand-call-conf', '30'] 
+	cmd += ['-ploidy', ploidy] 
+	cmd += ['-R', reference_file]
+	cmd += ['-I', infile]
+	cmd += ['-O', outfile]
+	if dry_run:
+		cmd += ['--dry-run']
+	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	with open(logfile, "w") as fp:
+		fp.write(res.stdout)
+
 #----------- CALL (public) FUNCTION
 def call(conf):
-	#interface
-	common.print_step_header('call SNPs')
 	
 	#should we do something?
 	RUN_THIS=conf['call']['run_this']
@@ -62,51 +105,65 @@ def call(conf):
 	cmd = "mkdir -p " + TMP_FOLDER
 	subprocess.run(cmd, shell=True)
 
-	#keeping track of the produced .g.vcf.gz files
+	#list of all .g.vcf.gz files produced/available
 	gvcf_list = []
+	#list of the arguments for parallel execution
+	args = None
+	#number of skipped samples (because already called in previous runs) 
 	skipped = 0
 
 	#------------ HaplotypeCaller
+	#interface
+	common.print_step_header('call SNPs - HaplotypeCaller')
 	#for each input bam
 	for infile in glob.glob(INFOLDER + '/*.gr.sorted.bam'):
 		#the produced gvcf file, log
-		gvcf = OUTFOLDER_GVCF + '/' + os.path.basename(infile).replace('.gr.sorted.bam', '.g.vcf.gz')
-		gvcf_log = OUTFOLDER_GVCF + '/' + os.path.basename(infile).replace('.gr.sorted.bam', '.log')
-		gvcf_list.append(gvcf)
+		fn = _create_filenames(infile, OUTFOLDER)
+		gvcf_list.append(fn['gvcf'])
 		
 		#should we skip this file?
 		if os.path.isfile(gvcf) and SKIP_PREVIOUSLY_COMPLETED:
 			skipped += 1
-			print('Skipping previously processed sample ' + gvcf)
+			print('Skipping previously processed sample ' + fn['gvcf'])
 			continue
 		
-		#https://gatk.broadinstitute.org/hc/en-us/articles/360042913231-HaplotypeCaller
-		#gatk --java-options "-Xmx4g" HaplotypeCaller  \
-		#   -R Homo_sapiens_assembly38.fasta \
-		#   -I input.bam \
-		#   -O output.g.vcf.gz \
-		#   -ERC GVCF \
-		#   -ploidy PLOIDY \
-		#   --min-pruning 1 #default is two \
-		#   -stand-call-conf 30 #default 
+		#the arguments for the current file. Column order is important,
+		#it should match the order for the parallel function, since 
+		#the arguments are passed as positionals
+		args_now = pd.DataFrame({
+			'ploidy' : [str(PLOIDY)], 
+			'reference_file' : [REFERENCE_FILE],
+			'infile'  : [infile],
+			'outfile' : fn['gvcf'],
+			'logfile' : fn['gvcf_log'],
+			'dry_run' : [DRY_RUN]
+		})
 		
-		cmd = ['gatk', '--java-options', '-Xmx4g', 'HaplotypeCaller']
-		cmd += ['-ERC', 'GVCF', '--min-pruning', '1', '-stand-call-conf', '30'] 
-		cmd += ['-ploidy', str(PLOIDY)] 
-		cmd += ['--native-pair-hmm-threads', str(CORES)]
-		cmd += ['-R', REFERENCE_FILE]
-		cmd += ['-I', infile]
-		cmd += ['-O', gvcf]
-		if DRY_RUN:
-			cmd += ['--dry-run']
-		res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-		with open(gvcf_log, "w") as fp:
-			fp.write(res.stdout)
-		
-		if len(gvcf_list) - skipped >= MAX_SAMPLES:
+		#storing in a single df
+		args = pd.concat([args, args_now])
+
+		#safeguard
+		if len(args) >= MAX_SAMPLES:
 			break
 
+	#do we have something to execute?
+	if args is None:
+		print('All samples skipped/inherited from previous runs')
+	else:		
+		#executing in parallel using multiprocessing module
+		with ThreadPool(CORES) as pool:
+			for result in pool.starmap(_haplotypecaller, args.itertuples(index = False)):
+				#nothing to do here (result is None)
+				pass
+
+		#closing interface
+		print('Samples: ')
+		print(' - samples called: ' + str(len(args)))
+		print(' - inherited from previous runs: ' + str(skipped))
+	
 	#------------ GenomicsDBImport
+	#interface
+	common.print_step_header('call SNPs - GenomicsDBImport')
 	#import everything in a genomic db
 	#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
 	#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
@@ -122,10 +179,11 @@ def call(conf):
 	cmd += ['--tmp-dir', TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	#print(' '.join(cmd))
-	#subprocess.run(cmd, shell=True)
+	subprocess.run(cmd, text=True)
 
 	#------------ GenotypeGVCFs
+	#interface
+	common.print_step_header('call SNPs - GenotypeGVCFs')
 	#joint variant calling
 	#https://gatk.broadinstitute.org/hc/en-us/articles/9570489472411-GenotypeGVCFs
 	# gatk --java-options "-Xmx4g" GenotypeGVCFs \
@@ -142,9 +200,6 @@ def call(conf):
 	cmd += ['--tmp-dir' + TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
-	#subprocess.run(cmd, shell=True)
+	subprocess.run(cmd, text=True)
 
-	#closing interface
-	print('Samples: ')
-	print(' - joint called: ' + str(len(gvcf_list)))
-	print(' - of which, inherited from previous runs: ' + str(skipped))
+
