@@ -176,7 +176,7 @@ def call(conf):
 	#      -V data/gvcfs/son.g.vcf.gz \
 	#      --genomicsdb-workspace-path my_database \
 	#      --tmp-dir /path/to/large/tmp \
-	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport', ' -L', 'chr1_1:1-10000']
+	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport', '-L', 'chr1_1:1-10000']
 	for g in gvcf_list:
 		cmd += ['-V', g]
 	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
