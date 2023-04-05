@@ -11,6 +11,7 @@ from align import align
 from call import call
 from demultiplex import demultiplex
 from genome_index import genome_index
+from post_execution import post_execution
 
 def Legpipe2(infile):
 	#reading the config in
@@ -24,6 +25,7 @@ def Legpipe2(infile):
 	genome_index(conf)
 	align(conf)
 	call(conf)
+	post_execution(conf)
 	
 	#done
 	return(conf)
