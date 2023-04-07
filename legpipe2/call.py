@@ -17,13 +17,13 @@ from multiprocessing.pool import ThreadPool
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
 	if not os.path.exists(conf['call']['reference_file']):
-		msg = 'Reference file does not exist: ' + conf['genome_index']['reference_file']
+		msg = 'Reference file does not exist: ' + conf['call']['reference_file']
 		raise FileNotFoundError(msg)
-	
-	if len(conf['call']['regions']) == 0:
-		msg = 'At least one genomic region is required in the form region:start-end'
-		raise ValueError(msg)
-
+		
+	if not os.path.exists(conf['call']['region_lengths_file']):
+		msg = 'Regions file does not exist: ' + conf['call']['region_lengths_file']
+		raise FileNotFoundError(msg)
+		
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	
@@ -42,15 +42,6 @@ def interpolate(conf, raw_conf):
 	res['call']['max_samples'] = raw_conf['call'].getint('max_samples')
 	if res['call']['max_samples'] == 0:
 		res['call']['max_samples'] = float('inf')
-	
-	#regions to be called on
-	res['call']['regions'] = []
-	for key in conf['call']:
-		if not key.startswith('region_'):
-			continue
-		#found a region, putting it in the array and cleaning up the single value
-		res['call']['regions'].append(conf['call'][key])
-		res['call'].pop(key)
 	
 	return(res)
 
@@ -115,6 +106,7 @@ def call(conf):
 	TMP_FOLDER=conf['call']['tmp_folder']
 	SKIP_PREVIOUSLY_COMPLETED=conf['call']['skip_previously_completed']
 	DRY_RUN=conf['call']['dry_run']
+	REGION_LENGTHS_FILE = conf['call']['region_lengths_file']
 
 	#tmp folder
 	cmd = "mkdir -p " + TMP_FOLDER
@@ -187,24 +179,29 @@ def call(conf):
 	#a mock names dictionary, so that we have the common reference to log files
 	fn = _create_filenames('/path/to/fakesample.bam', OUTFOLDER)
 	
-	#import everything in a genomic db
-	#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
-	#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
-	#      -V data/gvcfs/mother.g.vcf.gz \
-	#      -V data/gvcfs/father.g.vcf.gz \
-	#      -V data/gvcfs/son.g.vcf.gz \
-	#      --genomicsdb-workspace-path my_database \
-	#      --tmp-dir /path/to/large/tmp \
-	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport', '-L', 'chr1_1:1-10000']
-	for g in gvcf_list:
-		cmd += ['-V', g]
-	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
-	cmd += ['--tmp-dir', TMP_FOLDER]
-	if DRY_RUN:
-		cmd += ['--dry-run']
-	#res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	#with open(fn['GenomicsDBImport_log'], "w") as fp:
-	#	fp.write(res.stdout)
+	#import everything in a genomic db, for each region in the region file
+	with open(REGION_LENGTHS_FILE, 'r') as reg_fp:
+		for reg in reg_fp:
+			#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
+			#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
+			#      -V data/gvcfs/mother.g.vcf.gz \
+			#      -V data/gvcfs/father.g.vcf.gz \
+			#      -V data/gvcfs/son.g.vcf.gz \
+			#      --genomicsdb-workspace-path my_database \
+			#      --tmp-dir /path/to/large/tmp \
+			cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport']
+			cmd += ['-L', reg.rstrip()]
+			cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
+			cmd += ['--tmp-dir', TMP_FOLDER]
+			#calling on all the samples
+			for g in gvcf_list:
+				cmd += ['-V', g]
+			#should we dry run
+			if DRY_RUN:
+				cmd += ['--dry-run']
+			res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+			with open(fn['GenomicsDBImport_log'], "w") as fp:
+				fp.write(res.stdout)
 
 	#------------ GenotypeGVCFs
 	#interface
