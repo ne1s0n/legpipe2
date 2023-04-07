@@ -31,7 +31,7 @@ def genome_index(conf):
 	#----------- config
 	REFERENCE_FILE=conf['genome_index']['reference_file']
 	BOWTIE_INDEX=conf['genome_index']['bowtie_index']
-	CHROMOSOME_LENGTHS_FILE=conf['genome_index']['chromosome_lengths_file']
+	REGION_LENGTHS_FILE=conf['genome_index']['region_lengths_file']
 		
 	# ------------ bowtie
 	#bowtie needs to run in the reference genome folder, so that
@@ -41,9 +41,9 @@ def genome_index(conf):
 	print(cmd_str)
 	subprocess.run(cmd_str, shell=True)
 
-	# ------------ chrom lenghts
-	print('Chromosome lengths are stored in ' + CHROMOSOME_LENGTHS_FILE)
-	with open(CHROMOSOME_LENGTHS_FILE, 'w') as fp_out:
+	# ------------ region lenghts
+	print('Region lengths are stored in ' + REGION_LENGTHS_FILE)
+	with open(REGION_LENGTHS_FILE, 'w') as fp_out:
 		with gzip.open(REFERENCE_FILE, "rt") as fp_in:
 			for seq_record in SeqIO.parse(fp_in, "fasta"):
 				fp_out.write(seq_record.id + ':1-' + str(len(seq_record)) + '\n')	
