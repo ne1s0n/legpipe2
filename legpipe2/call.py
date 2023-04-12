@@ -179,46 +179,31 @@ def call(conf):
 	#a mock names dictionary, so that we have the common reference to log files
 	fn = _create_filenames('/path/to/fakesample.bam', OUTFOLDER)
 	
-	first_region = True
-	
 	#import everything in a genomic db, for each region in the region file
-	with open(REGION_LENGTHS_FILE, 'r') as reg_fp:
-		for reg in reg_fp:
-			#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
-			#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
-			#      -L chrom:start-end \
-			#      -V data/gvcfs/mother.g.vcf.gz \
-			#      -V data/gvcfs/father.g.vcf.gz \
-			#      -V data/gvcfs/son.g.vcf.gz \
-			#      --tmp-dir /path/to/large/tmp \
-			#
-			#  and also either:
-			#      --genomicsdb-workspace-path my_database \
-			#      --overwrite-existing-genomicsdb-workspace \
-			#  or:
-			#      --genomicsdb-update-workspace-path my_database \
-			cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport']
-			cmd += ['-L', reg.rstrip()]
-			cmd += ['--tmp-dir', TMP_FOLDER]
-			if first_region:
-				cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
-				cmd += ['--overwrite-existing-genomicsdb-workspace', 'true']
-			else:
-				cmd += ['--genomicsdb-update-workspace-path', EXPERIMENT]
-			#calling on all the samples
-			for g in gvcf_list:
-				cmd += ['-V', g]
-			
-			#ready to run
-			res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-			logmode = 'w' if first_region else 'a'
-			with open(fn['GenomicsDBImport_log'], logmode) as fp:
-				fp.write(res.stdout)
-				fp.write('------------------------------\n')
-			
-			#we are done with the first region
-			first_region = False
-
+	#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
+	#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
+	#      -L path/to/intervals.list \
+	#      -V data/gvcfs/mother.g.vcf.gz \
+	#      -V data/gvcfs/father.g.vcf.gz \
+	#      -V data/gvcfs/son.g.vcf.gz \
+	#      --tmp-dir /path/to/large/tmp \
+	#      --genomicsdb-workspace-path my_database \
+	#      --overwrite-existing-genomicsdb-workspace 
+	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport']
+	cmd += ['-L', REGION_LENGTHS_FILE]
+	cmd += ['--tmp-dir', TMP_FOLDER]
+	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
+	cmd += ['--overwrite-existing-genomicsdb-workspace', 'true']
+	#calling on all the samples
+	for g in gvcf_list:
+		cmd += ['-V', g]
+	
+	#ready to run
+	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	with open(fn['GenomicsDBImport_log'], 'w') as fp:
+		fp.write(res.stdout)
+		fp.write('------------------------------\n')
+	
 
 	#------------ GenotypeGVCFs
 	#interface
