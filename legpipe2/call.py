@@ -196,13 +196,13 @@ def call(conf):
 			#calling on all the samples
 			for g in gvcf_list:
 				cmd += ['-V', g]
-			#should we dry run
+			#should we dry run?
 			if DRY_RUN:
 				cmd += ['--dry-run']
 			res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 			with open(fn['GenomicsDBImport_log'], "a") as fp:
-				fp.write(fn['core'])
-				fp.write(' '.join(cmd))
+				fp.write('Region: ' + reg + '\n')
+				fp.write(' '.join(cmd) + '\n')
 				fp.write(res.stdout)
 				fp.write('------------------------------\n')
 
