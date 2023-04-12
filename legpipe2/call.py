@@ -199,7 +199,6 @@ def call(conf):
 			#      --genomicsdb-update-workspace-path my_database \
 			cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport']
 			cmd += ['-L', reg.rstrip()]
-			cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
 			cmd += ['--tmp-dir', TMP_FOLDER]
 			if first_region:
 				cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
