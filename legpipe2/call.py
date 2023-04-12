@@ -200,8 +200,11 @@ def call(conf):
 			if DRY_RUN:
 				cmd += ['--dry-run']
 			res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-			with open(fn['GenomicsDBImport_log'], "w") as fp:
+			with open(fn['GenomicsDBImport_log'], "a") as fp:
+				fp.write(fn['core'])
+				fp.write(' '.join(cmd))
 				fp.write(res.stdout)
+				fp.write('------------------------------\n')
 
 	#------------ GenotypeGVCFs
 	#interface
