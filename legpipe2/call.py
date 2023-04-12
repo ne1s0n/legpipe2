@@ -180,31 +180,34 @@ def call(conf):
 	fn = _create_filenames('/path/to/fakesample.bam', OUTFOLDER)
 	
 	#import everything in a genomic db, for each region in the region file
-	with open(REGION_LENGTHS_FILE, 'r') as reg_fp:
-		for reg in reg_fp:
-			#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
-			#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
-			#      -V data/gvcfs/mother.g.vcf.gz \
-			#      -V data/gvcfs/father.g.vcf.gz \
-			#      -V data/gvcfs/son.g.vcf.gz \
-			#      --genomicsdb-workspace-path my_database \
-			#      --tmp-dir /path/to/large/tmp \
-			cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport']
-			cmd += ['-L', reg.rstrip()]
-			cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
-			cmd += ['--tmp-dir', TMP_FOLDER]
-			#calling on all the samples
-			for g in gvcf_list:
-				cmd += ['-V', g]
-			#should we dry run?
-			if DRY_RUN:
-				cmd += ['--dry-run']
-			res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-			with open(fn['GenomicsDBImport_log'], "a") as fp:
-				fp.write('Region: ' + reg + '\n')
-				fp.write(' '.join(cmd) + '\n')
-				fp.write(res.stdout)
-				fp.write('------------------------------\n')
+	f = open(REGION_LENGTHS_FILE, "r")
+	regions = f.readlines()
+	f.close()
+	regions = [reg.strip() for reg in regions]
+	
+	#https://gatk.broadinstitute.org/hc/en-us/articles/360057439331-GenomicsDBImport
+		#gatk --java-options "-Xmx4g -Xms4g" GenomicsDBImport \
+		#      -L reg1:start-end,reg2:start-end \
+		#      -V data/gvcfs/mother.g.vcf.gz \
+		#      -V data/gvcfs/father.g.vcf.gz \
+		#      -V data/gvcfs/son.g.vcf.gz \
+		#      --genomicsdb-workspace-path my_database \
+		#      --tmp-dir /path/to/large/tmp \
+	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenomicsDBImport']
+	cmd += ['-L', ','.join(regions)]
+	cmd += ['--genomicsdb-workspace-path', EXPERIMENT]
+	cmd += ['--tmp-dir', TMP_FOLDER]
+	#calling on all the samples
+	for g in gvcf_list:
+		cmd += ['-V', g]
+	#should we dry run?
+	if DRY_RUN:
+		cmd += ['--dry-run']
+	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+	with open(fn['GenomicsDBImport_log'], "a") as fp:
+		fp.write(' '.join(cmd) + '\n')
+		fp.write(res.stdout)
+		fp.write('\n------------------------------\n')
 
 	#------------ GenotypeGVCFs
 	#interface
