@@ -216,10 +216,10 @@ def call(conf):
 	#   --tmp-dir /path/to/large/tmp
 	cmd = ['gatk', '--java-options', '-Xmx4g', 'GenotypeGVCFs']
 	cmd += ['-ploidy', str(PLOIDY)] 
-	cmd += ['-R',  REFERENCE_FILE] 
-	cmd += ['-V',  'gendb://' + EXPERIMENT]
-	cmd += ['-O',  OUTFOLDER + '/raw_SNPs_haplo.vcf.gz']
-	cmd += ['--tmp-dir' + TMP_FOLDER]
+	cmd += ['-R', REFERENCE_FILE] 
+	cmd += ['-V', 'gendb://' + EXPERIMENT]
+	cmd += ['-O', OUTFOLDER + '/raw_SNPs_haplo.vcf.gz']
+	cmd += ['--tmp-dir',  TMP_FOLDER]
 	if DRY_RUN:
 		cmd += ['--dry-run']
 	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
