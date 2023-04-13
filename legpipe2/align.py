@@ -44,7 +44,7 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	input fastq R1/R2 files'''
 
 	#--------- filenames
-	fn = create_filenames(infile_R1, outfolder)
+	fn = _create_filenames(infile_R1, outfolder)
 	
 	#--------- bowtie2 align
 	cmd = ['bowtie2', '-x', 'bowtie_index']
@@ -52,7 +52,7 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	cmd += ['-2', fn['infile_R2']]
 	cmd += ['-S', fn['tmp_sam']]
 	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	with open(log_bowtie2_align, "w") as fp:
+	with open(fn['log_bowtie2_align'], "w") as fp:
 		fp.write(res.stdout)
 	
 	#--------- samtools for sam -> bam conversion
@@ -67,27 +67,27 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	cmd += ['-O',  fn['tmp_bam_groups']]
 	cmd += ['-LB', 'Whatever', '-PL', 'Illumina', '-PU', 'Whatever', '-SM', fn['core']]
 	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	with open(log_picard_readGroups, "w") as fp:
+	with open(fn['log_picard_readGroups'], "w") as fp:
 		fp.write(res.stdout)
 
 	#--------- picard, ValidateSamFile
 	cmd = ['java', '-jar', '/home/ubuntu/software/picard.jar', 'ValidateSamFile']
 	cmd += ['-INPUT', fn['tmp_bam_groups']]
 	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	with open(log_picard_validation, "w") as fp:
+	with open(fn['log_picard_validation'], "w") as fp:
 		fp.write(res.stdout)
 	
 	#--------- samtools, sort
 	cmd = ['samtools', 'sort', fn['tmp_bam_groups']]
 	cmd += ['-o', fn['outfile']]
 	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	with open(log_samtools_sort, "w") as fp:
+	with open(fn['log_samtools_sort'], "w") as fp:
 		fp.write(res.stdout)
 	
 	#--------- samtools, index
 	cmd = ['samtools', 'index', fn['outfile']]
 	res = subprocess.run(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
-	with open(log_samtools_index, "w") as fp:
+	with open(fn['log_samtools_index'], "w") as fp:
 		fp.write(res.stdout)
 	
 	#--------- cleanup of intermediate files
@@ -138,6 +138,7 @@ def align(conf):
 	
 	#should we do something?
 	RUN_THIS=conf['align']['run_this']
+
 	if not RUN_THIS:
 		print('SKIPPED')
 		return(None)
@@ -153,16 +154,13 @@ def align(conf):
 	cmd_str = "mkdir -p " + OUTFOLDER
 	subprocess.run(cmd_str, shell=True)
 	
-	return(None)
-
-
 	#collecting all the arguments for the parallel execution in a pandas df
 	args = None
 	skipped = 0
 	for infile_R1 in glob.glob(INFOLDER + '/*_R1.fastq.gz'):
 		#should we skip this file?
-		fn = create_filenames(infile_R1, OUTFOLDER)
-		if os.path.isfile(res['outfile_index']) and SKIP_ALIGNED:
+		fn = _create_filenames(infile_R1, OUTFOLDER)
+		if os.path.isfile(fn['outfile_index']) and SKIP_ALIGNED:
 			skipped += 1
 			print('Skipping previously aligned sample ' + fn['core'])
 			continue
@@ -186,7 +184,7 @@ def align(conf):
 	#executing in parallel using multiprocessing module
 	cnt = 0
 	with ThreadPool(CORES) as pool:
-		for result in pool.starmap(align, args.itertuples(index = False)):
+		for result in pool.starmap(_do_align, args.itertuples(index = False)):
 			#result variable contains the core of the processed sample, but
 			#we don't want to flood the main screen (there's many log files)
 			#so we just do nothing with it
