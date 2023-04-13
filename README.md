@@ -13,7 +13,7 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
-- test align module
+- move from picard to gatk
 - implement post-execution script (for synch, shutdown...)
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)
