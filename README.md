@@ -13,7 +13,7 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
-- move from picard to gatk
+- support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module)
 - implement post-execution script (for synch, shutdown...)
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)

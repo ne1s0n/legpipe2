@@ -1,4 +1,4 @@
-#index the speficied genome file with bowtie2 and "samtools faidx",
+#index the speficied genome file with bowtie2, picard and "samtools faidx",
 #plus generate the intervals lenghts file
 
 import subprocess
@@ -8,11 +8,17 @@ from Bio import SeqIO
 import gzip
 
 def validate(conf):
-	'''validate incoming config parameters from .ini file'''
+	'''validate incoming config parameters from .ini file and env variables'''
 	#checking if files/paths exist
 	if not os.path.exists(conf['genome_index']['reference_file']):
 		msg = 'Reference file does not exist: ' + conf['genome_index']['reference_file']
 		raise FileNotFoundError(msg)
+	
+	#checking if picard env variable is there
+	if os.environ.get('PICARD') is None:
+		msg = 'You need to set the environmental variable $PICARD to point to your picard.jar'
+		raise EnvironmentError(msg)
+
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -44,6 +50,15 @@ def genome_index(conf):
 
 	# ------------ samtools faidx
 	cmd = ['samtools', 'faidx', REFERENCE_FILE]
+	print(' '.join(cmd))
+	subprocess.run(cmd, shell=False)
+	
+	# ------------ picard
+	#TODO add support for .fa.gz, .fasta.gz, case sensitivity etc
+	picard_out = REFERENCE_FILE.replace('.fa.gz', '.dict')
+	cmd = ['java', '-jar', os.environ.get('PICARD'), 'CreateSequenceDictionary']
+	cmd += ['-R',  REFERENCE_FILE]
+	cmd += ['-O',  picard_out]
 	print(' '.join(cmd))
 	subprocess.run(cmd, shell=False)
 
