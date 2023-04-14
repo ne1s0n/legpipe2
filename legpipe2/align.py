@@ -22,7 +22,10 @@ from multiprocessing.pool import ThreadPool
 
 #----------- SUPPORT FUNCTIONS
 def validate(conf):
-	'''validate incoming config parameters from .ini file'''
+	'''validate incoming config parameters from .ini file, plus environmental variables'''
+	if os.environ.get('PICARD') is None:
+		msg = 'You need to set the environmental variable $PICARD to point to your picard.jar'
+		raise EnvironmentError(msg)
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -59,41 +62,37 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	#--------- samtools for sam -> bam conversion
 	cmd = ['samtools', 'view']
 	cmd += ['-bS', fn['tmp_sam']]
-	cmd += ['>', fn['tmp_bam']]
-	subprocess.run(cmd, shell=False)
-	
+	with open(fn['tmp_bam'], "w") as fp:
+		subprocess.run(cmd, shell=False, stdout=fp)
+		
 	#--------- picard, AddOrReplaceReadGroups
-	cmd = ['java', '-jar', '/home/nelson/software/picard.jar', 'AddOrReplaceReadGroups']
+	cmd = ['java', '-jar', os.environ.get('PICARD'), 'AddOrReplaceReadGroups']
 	cmd += ['-I',  fn['tmp_bam']]
 	cmd += ['-O',  fn['tmp_bam_groups']]
 	cmd += ['-LB', 'Whatever', '-PL', 'Illumina', '-PU', 'Whatever', '-SM', fn['core']]
-	res = subprocess.run(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log_picard_readGroups'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
-		fp.write(res.stdout)
+		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 
 	#--------- picard, ValidateSamFile
-	cmd = ['java', '-jar', '/home/nelson/software/picard.jar', 'ValidateSamFile']
+	cmd = ['java', '-jar', os.environ.get('PICARD'), 'ValidateSamFile']
 	cmd += ['-INPUT', fn['tmp_bam_groups']]
-	res = subprocess.run(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log_picard_validation'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
-		fp.write(res.stdout)
+		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- samtools, sort
 	cmd = ['samtools', 'sort', fn['tmp_bam_groups']]
 	cmd += ['-o', fn['outfile']]
-	res = subprocess.run(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log_samtools_sort'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
-		fp.write(res.stdout)
+		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- samtools, index
 	cmd = ['samtools', 'index', fn['outfile']]
-	res = subprocess.run(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log_samtools_index'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
-		fp.write(res.stdout)
+		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- cleanup of intermediate files
 	subprocess.run(['rm', fn['tmp_sam']], shell=False)
@@ -168,7 +167,7 @@ def align(conf):
 		
 		
 		print('Aligning ' + fn['core'])
-		if os.path.isfile(fn['outfile_index']) and SKIP_ALIGNED:
+		if os.path.isfile(fn['outfile_index']) and SKIP_PREVIOUSLY_COMPLETED:
 			skipped += 1
 			print(' - skipping, previously aligned')
 			continue
