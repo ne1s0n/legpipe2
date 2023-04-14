@@ -1,4 +1,5 @@
-#index the speficied genome file
+#index the speficied genome file with bowtie2 and "samtools faidx",
+#plus generate the intervals lenghts file
 
 import subprocess
 import os
@@ -40,6 +41,11 @@ def genome_index(conf):
 	cmd_str += 'bowtie2-build ' + REFERENCE_FILE + ' ' + BOWTIE_INDEX
 	print(cmd_str)
 	subprocess.run(cmd_str, shell=True)
+
+	# ------------ samtools faidx
+	cmd = ['samtools', 'faidx', REFERENCE_FILE]
+	print(' '.join(cmd))
+	subprocess.run(cmd, shell=False)
 
 	# ------------ region lenghts
 	print('Region lengths are stored in ' + REGION_LENGTHS_FILE)
