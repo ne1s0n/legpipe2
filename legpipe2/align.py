@@ -54,10 +54,9 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	cmd += ['-1', fn['infile_R1']]
 	cmd += ['-2', fn['infile_R2']]
 	cmd += ['-S', fn['tmp_sam']]
-	res = subprocess.run(cmd, shell=False, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log_bowtie2_align'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
-		fp.write(res.stdout)
+		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- samtools for sam -> bam conversion
 	cmd = ['samtools', 'view']
@@ -197,5 +196,5 @@ def align(conf):
 			#so we just do nothing with it
 			cnt += 1
 	print('Total sample processed: ' + str(cnt))
-	print(' - of which, skipped because previous runs: ' + str(skipped))
+	print('Skipped because previous runs: ' + str(skipped))
 
