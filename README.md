@@ -13,8 +13,8 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO
 
-- support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module)
-- implement post-execution script (for synch, shutdown...)
+- support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module
+- the picard jar should be read in the config file like all other configs, it does not make sense to use an env variable only of this)
 - implement post calling filtering:
 	- select only biallelic SNPs and filter on allele frequency (MAF)
 	- [optional?] Remove adjacent SNPs
