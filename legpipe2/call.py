@@ -88,6 +88,8 @@ def _haplotypecaller(ploidy, reference_file, infile, outfile, logfile, dry_run):
 
 #----------- CALL (public) FUNCTION
 def call(conf):
+	#interface
+	common.print_step_header('SNP calling')
 	
 	#should we do something?
 	RUN_THIS=conf['call']['run_this']
