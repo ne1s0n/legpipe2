@@ -13,6 +13,7 @@ from demultiplex import demultiplex
 from genome_index import genome_index
 from post_execution import post_execution
 from post_call_filtering import post_call_filtering
+from output_matrices import output_matrices
 
 def Legpipe2(infile):
 	#reading the config in
@@ -27,6 +28,7 @@ def Legpipe2(infile):
 	align(conf)
 	call(conf)
 	post_call_filtering(conf)
+	output_matrices(conf)
 	post_execution(conf)
 	
 	#done
