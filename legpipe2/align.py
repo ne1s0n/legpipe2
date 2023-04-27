@@ -68,7 +68,7 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	cmd = ['java', '-jar', os.environ.get('PICARD'), 'AddOrReplaceReadGroups']
 	cmd += ['-I',  fn['tmp_bam']]
 	cmd += ['-O',  fn['tmp_bam_groups']]
-	cmd += ['-LB', 'Whatever', '-PL', 'Illumina', '-PU', 'Whatever', '-SM', fn['core']]
+	cmd += ['-LB', 'Whatever', '-PL', 'Illumina', '-PU', 'Whatever', '-SM', fn['core'], '-ID', fn['core']]
 	with open(fn['log_picard_readGroups'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
