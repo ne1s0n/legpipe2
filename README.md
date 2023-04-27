@@ -15,6 +15,7 @@ Work in progress & not ready to run. Stay tuned.
 
 - support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module
 - the picard jar should be read in the config file like all other configs, it does not make sense to use an env variable only of this)
+	- creating maybe a common section in the .ini
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
 - implement post calling filtering:
