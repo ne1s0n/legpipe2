@@ -16,6 +16,7 @@ Work in progress & not ready to run. Stay tuned.
 Modules still missing that need to be implemented
 
 - output matrices (actual allele counts, frequencies)
+- write installation tutorial
 
 ## TODO - Functionalities
 
