@@ -13,12 +13,20 @@
 #0/0:5,0:5:15:.:.:0,15,156
 
 import common
+import subprocess
+import os
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file, plus environmental variables'''
+	if not os.path.exists(conf['output_matrices']['infile']):
+		msg = 'Input file does not exist: ' + conf['output_matrices']['infile']
+		raise FileNotFoundError(msg)
+
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
+	conf['output_matrices']['infile'] = conf['output_matrices']['infolder'] + '/filtered_SNPs_haplo.vcf.gz'
+	
 	return(conf)
 
 def output_matrices(conf):
@@ -34,25 +42,92 @@ def output_matrices(conf):
 		print('SKIPPED')
 		return(None)
 	
-	#reference, for future
+	#core config
+	INFILE=conf['output_matrices']['infile']
+	OUTFOLDER=conf['output_matrices']['outfolder']
+	
+	#derived file names
+	LOGFILE = OUTFOLDER + '/output_matrices.log'
+	OUTFILE_SAMPLES   = OUTFOLDER + '/sample_list.txt'
+	OUTFILE_SNP_INFO  = OUTFOLDER + '/SNP_info.csv'
+	OUTFILE_SNP_BED   = OUTFOLDER + '/SNP_info.bed'
+	OUTFILE_MATRIX_AD = OUTFOLDER + '/matrix_AD.csv.gz'
+	OUTFILE_MATRIX_DP = OUTFOLDER + '/matrix_DP.csv.gz'
+
+	
+	#room for output
+	cmd_str = "mkdir -p " + OUTFOLDER
+	subprocess.run(cmd_str, shell=True)
+
+	
+	#reference links, for future
 	#https://www.reneshbedre.com/blog/vcf-fields.html
 	#https://samtools.github.io/bcftools/bcftools.html#query
 
 	#sample list, one per row
 	#bcftools query -l filtered_SNPs_haplo.vcf.gz > sample_list.txt
+	cmd = ['bcftools', 'query', '-l', INFILE]
+	with open(LOGFILE, 'w') as log_fp:
+		log_fp.write('------------------------\n')
+		log_fp.write(' '.join(cmd) + ' > ' + OUTFILE_SAMPLES + '\n')
+		log_fp.flush()
+		with open(OUTFILE_SAMPLES, "w") as out_fp:
+			subprocess.run(cmd, shell=False, stdout=out_fp, stderr=log_fp)
 
 	#SNP info: chromosome, position, ref allele and the first alternate allele
-	#bcftools query -f '%CHROM,%POS,%REF,%ALT{0}\n' filtered_SNPs_haplo.vcf.gz > SNP_info.txt
+	#bcftools query -f '%CHROM,%POS,%REF,%ALT{0}\n' filtered_SNPs_haplo.vcf.gz > SNP_info.csv
+	cmd = ['bcftools', 'query', '-f', '%CHROM,%POS,%REF,%ALT{0}\n', INFILE]
+	with open(LOGFILE, 'a') as log_fp:
+		log_fp.write('------------------------\n')
+		log_fp.write(' '.join(cmd) + ' > ' + OUTFILE_SNP_INFO + '\n')
+		log_fp.flush()
+		with open(OUTFILE_SNP_INFO, "w") as out_fp:
+			out_fp.write('Chromosome,position,reference_allele,alternative_allele\n')
+			out_fp.flush()
+			subprocess.run(cmd, shell=False, stdout=out_fp, stderr=log_fp)
 
 	#make a BED file: chr, pos (0-based), end pos (1-based), id
 	#bcftools query -f'%CHROM\t%POS0\t%END\t%ID\n' file.bcf > SNP_info.bed
-
-	#general structure for output
-	#bcftools view --apply-filters PASS infile.vcf.gz | bcftools query -f <some other filter> | bgzip -c > output.csv.gz
+	cmd = ['bcftools', 'query', '-f', '%CHROM\t%POS0\t%END\t%ID\n', INFILE]
+	with open(LOGFILE, 'a') as log_fp:
+		log_fp.write('------------------------\n')
+		log_fp.write(' '.join(cmd) + ' > ' + OUTFILE_SNP_BED + '\n')
+		log_fp.flush()
+		with open(OUTFILE_SNP_BED, "w") as out_fp:
+			subprocess.run(cmd, shell=False, stdout=out_fp, stderr=log_fp)
 
 	#allele count matrices: AD, DP
+	#general structure for the commands
+	#bcftools view --apply-filters PASS infile.vcf.gz | bcftools query -f <some other filter> | bgzip -c > output.csv.gz
+
 	#bcftools view --apply-filters PASS filtered_SNPs_haplo.vcf.gz | bcftools query -f '[%AD]\n' | bgzip -c > output_AD.csv.gz
-	#bcftools view --apply-filters PASS filtered_SNPs_haplo.vcf.gz | bcftools query -f '[%DP]\n' | bgzip -c > output_DP.csv.gz
+	cmd1 = ['bcftools', 'view', '--apply-filters', 'PASS', INFILE]
+	cmd2 = ['bcftools', 'query', '-f', '[%AD ]\n']
+	cmd3 = ['bgzip', '-c']
 	
-	print('WARNING: this is a stub function')
+	with open(LOGFILE, 'a') as log_fp:
+		log_fp.write('------------------------\n')
+		log_fp.write(' '.join(cmd1) + ' | ')
+		log_fp.write(' '.join(cmd2) + ' | ')
+		log_fp.write(' '.join(cmd3) + ' > ' + OUTFILE_MATRIX_AD + '\n')
+		log_fp.flush()
+		with open(OUTFILE_MATRIX_AD, "w") as out_fp:
+			p1 = subprocess.Popen(cmd1, stdout = subprocess.PIPE, stderr = log_fp)
+			p2 = subprocess.Popen(cmd2, stdin = p1.stdout, stderr = log_fp, stdout = subprocess.PIPE)
+			p3 = subprocess.run(cmd3, stdin = p2.stdout, stderr = log_fp, stdout = out_fp)
+	
+	#same thing, but for DP matrix
+	cmd2 = ['bcftools', 'query', '-f', '[%DP ]\n']
+	with open(LOGFILE, 'a') as log_fp:
+		log_fp.write('------------------------\n')
+		log_fp.write(' '.join(cmd1) + ' | ')
+		log_fp.write(' '.join(cmd2) + ' | ')
+		log_fp.write(' '.join(cmd3) + ' > ' + OUTFILE_MATRIX_DP + '\n')
+		log_fp.flush()
+		with open(OUTFILE_MATRIX_DP, "w") as out_fp:
+			p1 = subprocess.Popen(cmd1, stdout = subprocess.PIPE, stderr = log_fp)
+			p2 = subprocess.Popen(cmd2, stdin = p1.stdout, stderr = log_fp, stdout = subprocess.PIPE)
+			p3 = subprocess.run(cmd3, stdin = p2.stdout, stderr = log_fp, stdout = out_fp)
+
+	print('WARNING: this is a stub function. SNP info files are not coherent with output matrices (PASS filtering)')
 	return(None)

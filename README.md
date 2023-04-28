@@ -28,11 +28,14 @@ when something is wrong
 	- creating maybe a common section in the .ini
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
+- a infolder/outfolder chain in the .ini file
+- one outfolder for each step (evaluate a main output folder in the common section)
 
 ## WISHLIST
 
 Stuff that it would be nice to have, once the above blocks are empty
 
+- we are using both samtools and bcftools. Is it really necessary?
 - call module does a lot of work. it could probably be split in three
   modules (HaplotypeCaller, GenomicsDBImport and GenotypeGVCFs). On the
   other hand, I'm not sure how common is to do each step separatedly
