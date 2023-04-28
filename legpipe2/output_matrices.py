@@ -75,26 +75,30 @@ def output_matrices(conf):
 			subprocess.run(cmd, shell=False, stdout=out_fp, stderr=log_fp)
 
 	#SNP info: chromosome, position, ref allele and the first alternate allele
-	#bcftools query -f '%CHROM,%POS,%REF,%ALT{0}\n' filtered_SNPs_haplo.vcf.gz > SNP_info.csv
-	cmd = ['bcftools', 'query', '-f', '%CHROM,%POS,%REF,%ALT{0}\n', INFILE]
+	#bcftools view --apply-filters PASS filtered_SNPs_haplo.vcf.gz | bcftools query -f '%CHROM,%POS,%REF,%ALT{0}\n' filtered_SNPs_haplo.vcf.gz > SNP_info.csv
+	cmd1 = ['bcftools', 'view', '--apply-filters', 'PASS', INFILE]
+	cmd2 = ['bcftools', 'query', '-f', '%CHROM,%POS,%REF,%ALT{0}\n']
 	with open(LOGFILE, 'a') as log_fp:
 		log_fp.write('------------------------\n')
-		log_fp.write(' '.join(cmd) + ' > ' + OUTFILE_SNP_INFO + '\n')
+		log_fp.write(' '.join(cmd1) + ' | ' + ' '.join(cmd2) + ' > ' + OUTFILE_SNP_INFO + '\n')
 		log_fp.flush()
 		with open(OUTFILE_SNP_INFO, "w") as out_fp:
 			out_fp.write('Chromosome,position,reference_allele,alternative_allele\n')
 			out_fp.flush()
-			subprocess.run(cmd, shell=False, stdout=out_fp, stderr=log_fp)
+			p1 = subprocess.Popen(cmd1, stdout = subprocess.PIPE, stderr = log_fp)
+			subprocess.run(cmd2, shell=False, stdin = p1.stdout, stdout=out_fp, stderr=log_fp)
 
 	#make a BED file: chr, pos (0-based), end pos (1-based), id
-	#bcftools query -f'%CHROM\t%POS0\t%END\t%ID\n' file.bcf > SNP_info.bed
-	cmd = ['bcftools', 'query', '-f', '%CHROM\t%POS0\t%END\t%ID\n', INFILE]
+	#bcftools view --apply-filters PASS filtered_SNPs_haplo.vcf.gz | bcftools query -f'%CHROM\t%POS0\t%END\t%ID\n' file.bcf > SNP_info.bed
+	cmd1 = ['bcftools', 'view', '--apply-filters', 'PASS', INFILE]
+	cmd2 = ['bcftools', 'query', '-f', '%CHROM\t%POS0\t%END\t%ID\n']
 	with open(LOGFILE, 'a') as log_fp:
 		log_fp.write('------------------------\n')
-		log_fp.write(' '.join(cmd) + ' > ' + OUTFILE_SNP_BED + '\n')
+		log_fp.write(' '.join(cmd1) + ' | ' + ' '.join(cmd2) + ' > ' + OUTFILE_SNP_BED + '\n')
 		log_fp.flush()
 		with open(OUTFILE_SNP_BED, "w") as out_fp:
-			subprocess.run(cmd, shell=False, stdout=out_fp, stderr=log_fp)
+			p1 = subprocess.Popen(cmd1, stdout = subprocess.PIPE, stderr = log_fp)
+			subprocess.run(cmd2, shell=False, stdin = p1.stdout, stdout=out_fp, stderr=log_fp)
 
 	#allele count matrices: AD, DP
 	#general structure for the commands
@@ -129,5 +133,5 @@ def output_matrices(conf):
 			p2 = subprocess.Popen(cmd2, stdin = p1.stdout, stderr = log_fp, stdout = subprocess.PIPE)
 			p3 = subprocess.run(cmd3, stdin = p2.stdout, stderr = log_fp, stdout = out_fp)
 
-	print('WARNING: this is a stub function. SNP info files are not coherent with output matrices (PASS filtering)')
+	print('WARNING: this is a stub function. SNP matrix AD contains pairs of numbers, we only need one')
 	return(None)
