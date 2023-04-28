@@ -15,6 +15,7 @@
 import common
 import subprocess
 import os
+import gzip
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file, plus environmental variables'''
@@ -22,12 +23,31 @@ def validate(conf):
 		msg = 'Input file does not exist: ' + conf['output_matrices']['infile']
 		raise FileNotFoundError(msg)
 
-
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	conf['output_matrices']['infile'] = conf['output_matrices']['infolder'] + '/filtered_SNPs_haplo.vcf.gz'
 	
 	return(conf)
+
+def _split_AD(infile):
+	'''splits AD file, creates two more matrices with counted reference and alternative alleles'''
+	outfileRef = infile.replace('_AD.csv.gz', '_countRef.csv.gz')
+	outfileAlt = infile.replace('_AD.csv.gz', '_countAlt.csv.gz')
+	
+	with gzip.open(infile, 'rt') as fp_in:
+		with gzip.open(outfileRef, 'wt') as fp_ref:
+			with gzip.open(outfileAlt, 'wt') as fp_alt:
+				for line in fp_in:
+					#splitting the various AD values, expected as cntRef,cntAlt
+					pieces = line.strip().split(' ')
+					
+					#splitting again
+					for p in pieces:
+						cnt = p.split(',')
+						fp_ref.write(cnt[0] + ' ')
+						fp_alt.write(cnt[1] + ' ')
+					fp_ref.write('\n')
+					fp_alt.write('\n')
 
 def output_matrices(conf):
 	'''main function for outputing matrices'''
@@ -53,12 +73,10 @@ def output_matrices(conf):
 	OUTFILE_SNP_BED   = OUTFOLDER + '/SNP_info.bed'
 	OUTFILE_MATRIX_AD = OUTFOLDER + '/matrix_AD.csv.gz'
 	OUTFILE_MATRIX_DP = OUTFOLDER + '/matrix_DP.csv.gz'
-
 	
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
 	subprocess.run(cmd_str, shell=True)
-
 	
 	#reference links, for future
 	#https://www.reneshbedre.com/blog/vcf-fields.html
@@ -133,5 +151,7 @@ def output_matrices(conf):
 			p2 = subprocess.Popen(cmd2, stdin = p1.stdout, stderr = log_fp, stdout = subprocess.PIPE)
 			p3 = subprocess.run(cmd3, stdin = p2.stdout, stderr = log_fp, stdout = out_fp)
 
-	print('WARNING: this is a stub function. SNP matrix AD contains pairs of numbers, we only need one')
+	#splitting the AD field in reference and alternative
+	_split_AD(OUTFILE_MATRIX_AD)
+	
 	return(None)
