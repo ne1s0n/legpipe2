@@ -18,9 +18,6 @@ def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#files
 	conf['post_call_filtering']['infile'] = conf['post_call_filtering']['infolder'] + '/raw_SNPs_haplo.vcf.gz'
-	conf['post_call_filtering']['outfile'] = conf['post_call_filtering']['infolder'] + '/filtered_SNPs_haplo.vcf.gz'
-	conf['post_call_filtering']['tmpfile'] = conf['post_call_filtering']['infolder'] + '/tmp.vcf.gz'
-	conf['post_call_filtering']['logfile'] = conf['post_call_filtering']['infolder'] + '/post_call_filtering.log'
 	
 	#MAF
 	conf['post_call_filtering']['min_maf'] = raw_conf['post_call_filtering'].getfloat('min_maf') 
@@ -44,12 +41,20 @@ def post_call_filtering(conf):
 		
 	#config
 	INFILE=conf['post_call_filtering']['infile']
-	OUTFILE=conf['post_call_filtering']['outfile']
-	TMPFILE=conf['post_call_filtering']['tmpfile']
-	LOGFILE=conf['post_call_filtering']['logfile']
+	OUTFOLDER=conf['post_call_filtering']['outfolder']
 	REFERENCE_FILE=conf['post_call_filtering']['reference_file']
 	MIN_MAF=conf['post_call_filtering']['min_maf']
 	MIN_MQ=conf['post_call_filtering']['min_mq']
+	
+	#derived conf
+	OUTFILE = OUTFOLDER + '/filtered_SNPs_haplo.vcf.gz'
+	TMPFILE = OUTFOLDER + '/tmp.vcf.gz'
+	LOGFILE = OUTFOLDER + '/post_call_filtering.log'
+	
+	#room for output
+	cmd_str = "mkdir -p " + OUTFOLDER
+	subprocess.run(cmd_str, shell=True)
+
 	
 	#FILTER ONE: biallelic
 	#https://gatk.broadinstitute.org/hc/en-us/articles/360037055952-SelectVariants
