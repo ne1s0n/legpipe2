@@ -26,6 +26,10 @@ def validate(conf):
 	if os.environ.get('PICARD') is None:
 		msg = 'You need to set the environmental variable $PICARD to point to your picard.jar'
 		raise EnvironmentError(msg)
+	if not os.path.exists(conf['align']['reference_file']):
+		msg = 'Reference file does not exist: ' + conf['align']['reference_file']
+		raise FileNotFoundError(msg)
+
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
