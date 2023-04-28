@@ -15,7 +15,6 @@ Work in progress & not ready to run. Stay tuned.
 
 Modules still missing that need to be implemented
 
-- output matrices (actual allele counts, frequencies)
 - write installation tutorial
 
 ## TODO - Functionalities
@@ -28,8 +27,6 @@ when something is wrong
 	- creating maybe a common section in the .ini
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
-- a infolder/outfolder chain in the .ini file
-- one outfolder for each step (evaluate a main output folder in the common section)
 
 ## WISHLIST
 
@@ -46,4 +43,4 @@ Stuff that it would be nice to have, once the above blocks are empty
 	- [optional] Consolidate SNPs
 	- [optional] Select SNPs based on parental scores (only applies to some mapping populations)
 	- [optional] Remove cosegregating SNP markers
-
+- remove any subprocess.run(..., shell=True)
