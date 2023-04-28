@@ -113,6 +113,11 @@ def call(conf):
 	#tmp folder
 	cmd = "mkdir -p " + TMP_FOLDER
 	subprocess.run(cmd, shell=True)
+	
+	#room for output
+	cmd = "mkdir -p " + OUTFOLDER
+	subprocess.run(cmd, shell=True)
+
 
 	#list of all .g.vcf.gz files produced/available
 	gvcf_list = []
