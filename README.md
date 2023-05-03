@@ -22,17 +22,17 @@ Modules still missing that need to be implemented
 Checks and features that ensure the pipeline fails gracefully
 when something is wrong
 
-- support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module
+- support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module)
 - the picard jar should be read in the config file like all other configs, it does not make sense to use an env variable only of this)
 	- creating maybe a common section in the .ini
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
-- better commands in .ini: single line, quoted spaces
 
 ## WISHLIST
 
 Stuff that it would be nice to have, once the above blocks are empty
 
+- export to conf file all the commands, especially from align/filter
 - we are using both samtools and bcftools. Is it really necessary?
 - call module does a lot of work. it could probably be split in three
   modules (HaplotypeCaller, GenomicsDBImport and GenotypeGVCFs). On the

@@ -5,9 +5,11 @@ import subprocess
 import glob
 import os
 import common
+import shlex
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
+
 	#checking if files/paths exist
 	if not os.path.exists(conf['demultiplex']['infile_r1']):
 		msg = 'Input file demultiplex/infile_r1 does not exist: ' + conf['demultiplex']['infile_r1']
@@ -21,6 +23,8 @@ def validate(conf):
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
+	#the demultiplex command, customized by user
+	conf['demultiplex']['cmd'] = shlex.split(conf['demultiplex']['cmd'])
 	return(conf)
 	
 def demultiplex(conf):

@@ -35,8 +35,6 @@ def read_config(infile):
 			#some on-the-fly interpolations for common values in all sections
 			if key == 'run_this':
 				res[section][key] = config[section].getboolean(key)	
-			elif key == 'cmd':
-				res[section][key] = config[section][key].split('\n')
 			else:
 				#just copying the value
 				res[section][key] = config[section][key]

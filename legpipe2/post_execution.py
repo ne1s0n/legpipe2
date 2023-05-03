@@ -3,9 +3,12 @@
 import os
 import common
 import subprocess
+import shlex
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
+	#the command, customized by user
+	conf['post_execution']['cmd'] = shlex.split(conf['post_execution']['cmd'])
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -22,11 +25,11 @@ def post_execution(conf):
 		print('SKIPPED')
 		return(None)
 	#config
-	CMD=conf['post_execution']['cmd'][0]
+	CMD=conf['post_execution']['cmd']
 	#execution
-	if CMD == '':
+	if len(CMD) == 0:
 		print('No script specified')
 	else:
-		print('Running script: ' + CMD)
-		subprocess.run(CMD, shell=True)
+		print('Running script: ' + ' '.join(CMD))
+		subprocess.run(CMD, shell=False)
 	

@@ -9,6 +9,7 @@ import os
 import pandas as pd
 import sys
 import pickle
+import shlex
 #instead of basic Pool, for complicated reasons linked to shared memory
 #that would prevent pandas to be pickable, we use ThreadPool 
 from multiprocessing.pool import ThreadPool 
@@ -16,6 +17,9 @@ from multiprocessing.pool import ThreadPool
 #----------- SUPPORT FUNCTIONS
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
+	#the trim command, customized by user
+	conf['trim']['cmd'] = shlex.split(conf['trim']['cmd'])
+	
 	#these values should be boolean
 	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
 	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
