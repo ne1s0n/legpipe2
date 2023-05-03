@@ -27,6 +27,7 @@ when something is wrong
 	- creating maybe a common section in the .ini
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
+- better commands in .ini: single line, quoted spaces
 
 ## WISHLIST
 
