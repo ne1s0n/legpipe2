@@ -10,6 +10,9 @@ def validate(conf):
 	if not os.path.exists(conf['post_call_filtering']['infile']):
 		msg = 'Input file does not exist: ' + conf['post_call_filtering']['infile']
 		raise FileNotFoundError(msg)
+	if not os.path.exists(conf['post_call_filtering']['infile'] + '.tbi'):
+		msg = 'Index file for input vcf does not exist: ' + conf['post_call_filtering']['infile'] + '.tbi'
+		raise FileNotFoundError(msg)
 	if not os.path.exists(conf['post_call_filtering']['reference_file']):
 		msg = 'Reference file does not exist: ' + conf['post_call_filtering']['reference_file']
 		raise FileNotFoundError(msg)
