@@ -38,7 +38,7 @@ Stuff that it would be nice to have, once the above blocks are empty
   modules (HaplotypeCaller, GenomicsDBImport and GenotypeGVCFs). On the
   other hand, I'm not sure how common is to do each step separatedly
 - implement test for required software (maybe module based? like what
-  is done for `interpolate()` and `validate()` functions)
+  is done for `interpolate()` and `validate()` functions). Also check for python 3.6+
 - post calling filtering from UGbS-Flex:
 	- [optional] Remove adjacent SNPs
 	- [optional] Consolidate SNPs

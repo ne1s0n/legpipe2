@@ -1,6 +1,12 @@
 #!/bin/bash
 
-#software base folder, where to save stuff
+#This is an installation script for all software required by legpipe2
+#Its intended scope is to bring a clean slate, ubuntu 64 (aws based)
+#machine from mint conditions to ready-to-run. Your mileage may vary.
+#Worst case: use the script as a shopping list for everything you need
+#to install
+
+#software base folder, where to save stuff that is not installed via apt
 LEGPIPE_ROOT=~/software
 mkdir -p $LEGPIPE_ROOT
 
@@ -16,7 +22,6 @@ sudo apt install -y parallel
 sudo apt install -y fastp
 
 #python3 and modules
-#TODO how to check if python is at least version 3.6?
 sudo apt install -y python3
 sudo apt install -y python3-pip
 pip install pandas
@@ -33,41 +38,30 @@ tar -xf fastx_toolkit_0.0.13_binaries_Linux_2.6_amd64.tar.bz2
 mv bin fastx_folder
 echo PATH=$LEGPIPE_ROOT/fastx_folder:$PATH >> $PATHFILE
 
-#Install Bowtie2
+#bowtie2
 sudo apt install -y bowtie2
 
-#Install samtools, here for version 1.3.1, update accordingly
-sudo apt install -y make
-sudo apt install -y gcc
-sudo apt install -y libncurses-dev
-sudo apt install -y libz-dev
-wget https://github.com/samtools/samtools/releases/download/1.3.1/samtools-1.3.1.tar.bz2 -O samtools.tar.bz2
-tar -xjvf samtools.tar.bz2
-cd samtools-1.3.1
-make
-sudo make prefix=/usr/local/bin install
-echo PATH=$LEGPIPE_ROOT/samtools-1.3.1:$PATH >> $PATHFILE
+#samtools, here for version 1.3.1, update accordingly
+sudo install samtools
 
-#Install picard
+#picard
 cd $LEGPIPE_ROOT
 wget https://github.com/broadinstitute/picard/releases/download/3.0.0/picard.jar
 #add thus to ~/.bashrc
 echo export PICARD=$LEGPIPE_ROOT/picard.jar >> $PATHFILE
 
-#Install GATK
-#GATK asks for java 17, so...
+#GATK
 sudo apt install -y openjdk-17-jre-headless
-
+sudo apt install -y unzip
 #No installation require for GATK, download version 4.3 and just change the python/python3 shebang
 cd $LEGPIPE_ROOT
-sudo apt install -y unzip
 wget https://github.com/broadinstitute/gatk/releases/download/4.3.0.0/gatk-4.3.0.0.zip 
 unzip gatk-4.3.0.0.zip
 #edit the very first line of ./gatk from "#!/usr/bin/env python" to "#!/usr/bin/python3"
 sed -i 's|#!/usr/bin/env python|#!/usr/bin/python3|' gatk-4.3.0.0/gatk
 echo PATH=$LEGPIPE_ROOT/gatk-4.3.0.0:$PATH >> $PATHFILE
 
-#install bcftools
+#bcftools
 sudo apt install -y bcftools
 
 #done
