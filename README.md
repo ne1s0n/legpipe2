@@ -26,11 +26,13 @@ The configuration file is the core of the pipeline, since it dictates what steps
 - [dDocent](https://github.com/jpuritz/dDocent)
 - [UGbS-Flex](https://github.com/madgenetics/UGbS-Flex)
 
-## TODO - Big chunks
+## TODO
+
+### Big chunks
 
 Nothing :)
 
-## TODO - Functionalities
+### Functionalities
 
 Checks and features that ensure the pipeline fails gracefully
 when something is wrong:
@@ -39,7 +41,7 @@ when something is wrong:
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
 
-## WISHLIST
+### Wishlist
 
 Stuff that it would be nice to have, once the above blocks are empty:
 
