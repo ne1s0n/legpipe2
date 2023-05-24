@@ -4,7 +4,7 @@ The SNP calling pipeline used at CREA-ZA (Lodi, Italy). Main application is legu
 
 ## Status
 
-Work in progress & not ready to run. Stay tuned.
+Usable. Still need testing, especially installation.
 
 ## Main inspirations
 
@@ -13,24 +13,20 @@ Work in progress & not ready to run. Stay tuned.
 
 ## TODO - Big chunks
 
-Modules still missing that need to be implemented
-
-- write installation tutorial
+Nothing :)
 
 ## TODO - Functionalities
 
 Checks and features that ensure the pipeline fails gracefully
-when something is wrong
+when something is wrong:
 
 - support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module)
-- the picard jar should be read in the config file like all other configs, it does not make sense to use an env variable only of this)
-	- creating maybe a common section in the .ini
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
 
 ## WISHLIST
 
-Stuff that it would be nice to have, once the above blocks are empty
+Stuff that it would be nice to have, once the above blocks are empty:
 
 - export to conf file all the commands, especially from align/filter
 - we are using both samtools and bcftools. Is it really necessary?

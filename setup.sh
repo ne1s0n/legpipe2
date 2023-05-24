@@ -47,7 +47,7 @@ sudo install samtools
 #picard
 cd $LEGPIPE_ROOT
 wget https://github.com/broadinstitute/picard/releases/download/3.0.0/picard.jar
-#add thus to ~/.bashrc
+#add this to the path file, so that to allow commands like "java -jar $PICARD ..."
 echo export PICARD=$LEGPIPE_ROOT/picard.jar >> $PATHFILE
 
 #GATK
