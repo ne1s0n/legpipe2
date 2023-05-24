@@ -4,7 +4,22 @@ The SNP calling pipeline used at CREA-ZA (Lodi, Italy). Main application is legu
 
 ## Status
 
-Usable. Still need testing, especially installation.
+Usable.
+
+## Dependencies
+
+Legpipe2 internally uses many other tools. The script [setup.sh](setup.sh) allows to install everything
+starting from a clean ubuntu machine (here "ubuntu" means: apt package manager, sudo for installation privileges, basing Unix shell).
+Even if you are not using [setup.sh](setup.sh) you should check it and use it as a guideline for setting up
+your machine.
+
+## Using Legpipe2
+
+Since it's python3 all the way down, you just have to clone the repo. Then do a:
+
+`python3 /path/to/legpipe2.py your_config_file.ini`
+
+The configuration file is the core of the pipeline, since it dictates what steps are going to be executed and on what data. A lot of interesting details are provided in the [sample_config.ini](sample_config.ini) example file.
 
 ## Main inspirations
 
