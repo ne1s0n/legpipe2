@@ -41,6 +41,11 @@ when something is wrong:
 - check if the reference genome is gzipped and not bgzipped
 - indexing module needs a better management of the logs
 
+### Bugs
+
+- validation for post_call_filtering step looks for a vcf which may not be there
+  yet if we are running the whole pipeline and not one step at a time
+
 ### Wishlist
 
 Stuff that it would be nice to have, once the above blocks are empty:
