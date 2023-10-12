@@ -44,8 +44,13 @@ def _split_AD(infile):
 					#splitting again
 					for p in pieces:
 						cnt = p.split(',')
-						fp_ref.write(cnt[0] + ' ')
-						fp_alt.write(cnt[1] + ' ')
+						if len(cnt) == 2:
+							fp_ref.write(cnt[0] + ' ')
+							fp_alt.write(cnt[1] + ' ')
+						else:
+							#missing data or something similarly unparsable
+							fp_ref.write(' ')
+							fp_alt.write(' ')
 					fp_ref.write('\n')
 					fp_alt.write('\n')
 
