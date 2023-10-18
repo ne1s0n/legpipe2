@@ -54,8 +54,7 @@ def genome_index(conf):
 	subprocess.run(cmd, shell=False)
 	
 	# ------------ picard
-	#TODO add support for .fa.gz, .fasta.gz, case sensitivity etc
-	picard_out = REFERENCE_FILE.replace('.fa.gz', '.dict')
+	picard_out = REFERENCE_FILE + '.dict'
 	cmd = ['java', '-jar', os.environ.get('PICARD'), 'CreateSequenceDictionary']
 	cmd += ['-R',  REFERENCE_FILE]
 	cmd += ['-O',  picard_out]
