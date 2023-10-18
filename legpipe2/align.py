@@ -194,18 +194,18 @@ def align(conf):
 			break
 
 	#do we have something to execute?
+	cnt = 0
 	if args is None:
 		print('All samples skipped, no operation required')
-		sys.exit(0)
-
-	#executing in parallel using multiprocessing module
-	cnt = 0
-	with ThreadPool(CORES) as pool:
-		for result in pool.starmap(_do_align, args.itertuples(index = False)):
-			#result variable contains the core of the processed sample, but
-			#we don't want to flood the main screen (there's many log files)
-			#so we just do nothing with it
-			cnt += 1
+	else:
+		#executing in parallel using multiprocessing module
+		with ThreadPool(CORES) as pool:
+			for result in pool.starmap(_do_align, args.itertuples(index = False)):
+				#result variable contains the core of the processed sample, but
+				#we don't want to flood the main screen (there's many log files)
+				#so we just do nothing with it
+				cnt += 1
+				
 	print('Total sample processed: ' + str(cnt))
 	print('Skipped because previous runs: ' + str(skipped))
 
