@@ -110,6 +110,10 @@ def call(conf):
 	DRY_RUN=conf['call']['dry_run']
 	REGION_LENGTHS_FILE = conf['call']['region_lengths_file']
 
+	#should we do something?
+	if DRY_RUN:
+		print('Doing a DRY_RUN (not really calling anything)')
+
 	#tmp folder
 	cmd = "mkdir -p " + TMP_FOLDER
 	subprocess.run(cmd, shell=True)
