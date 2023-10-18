@@ -6,6 +6,7 @@ import os
 import common
 from Bio import SeqIO
 import gzip
+import re
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file and env variables'''
@@ -54,7 +55,10 @@ def genome_index(conf):
 	subprocess.run(cmd, shell=False)
 	
 	# ------------ picard
-	picard_out = REFERENCE_FILE + '.dict'
+	#substitute .fasta.gz, .fa.gz and all the upper/lower case variants with .dict
+	picard_out = re.sub('(?i)\.fasta\.gz$', '.dict', REFERENCE_FILE)
+	picard_out = re.sub('(?i)\.fa\.gz$', '.dict', picard_out)
+	
 	cmd = ['java', '-jar', os.environ.get('PICARD'), 'CreateSequenceDictionary']
 	cmd += ['-R',  REFERENCE_FILE]
 	cmd += ['-O',  picard_out]
