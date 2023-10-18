@@ -72,8 +72,6 @@ def demultiplex(conf):
 	cmd += ['-b', BARCODES]
 	cmd += ['-t', STATS_FILE]
 	
-	print(' '.join(cmd))
-
 	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(LOG_FILE, "w") as fp:
 		fp.write(res.stdout)
