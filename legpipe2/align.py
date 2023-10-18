@@ -16,6 +16,8 @@ import glob
 import os
 import pandas as pd
 import common
+import sys
+
 #instead of basic Pool, for complicated reasons linked to shared memory
 #that would prevent pandas to be pickable, we use ThreadPool 
 from multiprocessing.pool import ThreadPool 
@@ -190,6 +192,11 @@ def align(conf):
 		#safeguard
 		if len(args) >= MAX_SAMPLES:
 			break
+
+	#do we have something to execute?
+	if args is None:
+		print('All samples skipped, no operation required')
+		sys.exit(0)
 
 	#executing in parallel using multiprocessing module
 	cnt = 0
