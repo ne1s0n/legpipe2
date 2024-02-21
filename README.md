@@ -2,7 +2,7 @@
 
 The SNP calling pipeline used at CREA-ZA (Lodi, Italy). Main application is legumes (diploid and tetraploid) and restricted sequencing (mainly Genotyping By Sequencing). You can use it for everything else, though.
 
-Main features:
+## Main features
 
 - clean separation in modules (alignment, trimmin, SNP calling, ...)
 - each module can be (re)executed easily, carries its own configuration
@@ -41,8 +41,8 @@ Nothing :)
 
 ### Functionalities
 
-Checks and features that ensure the pipeline fails gracefully
-when something is wrong:
+I'd like to implement the following checks and features to ensure 
+that the pipeline fails gracefully when something goes wrong:
 
 - support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module)
 - check if the reference genome is gzipped and not bgzipped
