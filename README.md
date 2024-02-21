@@ -43,8 +43,7 @@ when something is wrong:
 
 ### Bugs
 
-- validation for post_call_filtering step looks for a vcf which may not be there
-  yet if we are running the whole pipeline and not one step at a time
+None known :)
 
 ### Wishlist
 

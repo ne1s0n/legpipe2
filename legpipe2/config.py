@@ -11,12 +11,17 @@
 import configparser
 import importlib
 import os
+import common
 
 def read_config(infile):
 	'''
 	Reads the config file in .ini format, parse some data so e.g. there's lists
 	and not many keys, returns a dictionary
 	'''
+	
+	#interface
+	common.print_step_header('Checking config file')
+
 	
 	#check if file exists
 	if not os.path.exists(infile):

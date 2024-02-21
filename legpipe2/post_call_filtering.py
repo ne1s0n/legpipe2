@@ -4,17 +4,21 @@ import os
 import common
 import subprocess
 
-def validate(conf):
-	'''validate incoming config parameters from .ini file'''
+def validate(conf, runtime = False):
+	'''validate incoming config parameters from .ini file. Since some 
+	argument do exist only when the previous steps are executed, we have the runtime
+	parameter which is true only when post_call_filtering() is called'''
+	
 	#checking if files/paths exist
-	if not os.path.exists(conf['post_call_filtering']['infile']):
-		msg = 'Input file does not exist: ' + conf['post_call_filtering']['infile']
-		raise FileNotFoundError(msg)
-	if not os.path.exists(conf['post_call_filtering']['infile'] + '.tbi'):
-		msg = 'Index file for input vcf does not exist: ' + conf['post_call_filtering']['infile'] + '.tbi'
-		raise FileNotFoundError(msg)
-	if not os.path.exists(conf['post_call_filtering']['reference_file']):
-		msg = 'Reference file does not exist: ' + conf['post_call_filtering']['reference_file']
+	if runtime:
+		if not os.path.exists(conf['post_call_filtering']['infile']):
+			msg = 'Input file does not exist: ' + conf['post_call_filtering']['infile']
+			raise FileNotFoundError(msg)
+		if not os.path.exists(conf['post_call_filtering']['infile'] + '.tbi'):
+			msg = 'Index file for input vcf does not exist: ' + conf['post_call_filtering']['infile'] + '.tbi'
+			raise FileNotFoundError(msg)
+		if not os.path.exists(conf['post_call_filtering']['reference_file']):
+			msg = 'Reference file does not exist: ' + conf['post_call_filtering']['reference_file']
 		raise FileNotFoundError(msg)
 		
 def interpolate(conf, raw_conf):
@@ -41,6 +45,9 @@ def post_call_filtering(conf):
 	if not RUN_THIS:
 		print('SKIPPED')
 		return(None)
+	
+	#let's check if all required files are here
+	validate(conf=conf, runtime=True) 
 		
 	#config
 	INFILE=conf['post_call_filtering']['infile']
