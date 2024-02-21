@@ -17,11 +17,13 @@ import subprocess
 import os
 import gzip
 
-def validate(conf):
-	'''validate incoming config parameters from .ini file, plus environmental variables'''
-	if not os.path.exists(conf['output_matrices']['infile']):
-		msg = 'Input file does not exist: ' + conf['output_matrices']['infile']
-		raise FileNotFoundError(msg)
+def validate(conf, runtime = False):
+	'''validate incoming config parameters from .ini file, plus environmental variables.
+	Validation at runtime requires all files to be ready'''
+	if runtime:
+		if not os.path.exists(conf['output_matrices']['infile']):
+			msg = 'Input file does not exist: ' + conf['output_matrices']['infile']
+			raise FileNotFoundError(msg)
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -67,6 +69,8 @@ def output_matrices(conf):
 		print('SKIPPED')
 		return(None)
 	
+	#let's check if all required files are here
+	validate(conf=conf, runtime=True) 
 	#core config
 	INFILE=conf['output_matrices']['infile']
 	OUTFOLDER=conf['output_matrices']['outfolder']
