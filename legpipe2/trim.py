@@ -23,6 +23,7 @@ def interpolate(conf, raw_conf):
 	#these values should be boolean
 	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
 	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
+	conf['trim']['paired_ends'] = raw_conf['trim'].getboolean('paired_ends') 
 
 	#these values should be int
 	conf['trim']['cores'] = raw_conf['trim'].getint('cores') 
@@ -37,7 +38,7 @@ def interpolate(conf, raw_conf):
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
 
-def _create_filenames(infile_R1, outfolder):
+def _create_filenames(infile_R1, outfolder, paired_ends):
 	'''returns a dictionary with all the filenames derived from the input R1
 	and the outfolder'''
 	
@@ -47,29 +48,36 @@ def _create_filenames(infile_R1, outfolder):
 	res['core'] = os.path.basename(infile_R1).replace('_R1.fastq.gz', '')
 	
 	#the other input file
-	res['infile_R2'] = infile_R1.replace('_R1', '_R2')
 
 	#output files
 	res['outfile_R1']   = outfolder + '/' + res['core'] + '_R1.fastq.gz'
-	res['outfile_R2']   = outfolder + '/' + res['core'] + '_R2.fastq.gz'
 	res['outfile_json'] = outfolder + '/' + res['core'] + '.json'
 	res['outfile_html'] = outfolder + '/' + res['core'] + '.html'
 	res['log']          = outfolder + '/' + res['core'] + '.fastp_trimming.log'
 	
+	#are we single or paired ends?
+	if paired_ends:
+		res['infile_R2'] = infile_R1.replace('_R1', '_R2')
+		res['outfile_R2'] = outfolder + '/' + res['core'] + '_R2.fastq.gz'
+	else:
+		res['infile_R2'] = None
+		res['outfile_R2'] = None
+	
 	return(res)
 
-def _do_trim(infile_R1, outfolder, trim_cmd):
+def _do_trim(infile_R1, outfolder, trim_cmd, paired_ends):
 	'''executes the trimming for one R1/R2 pair'''
 	#--------- filenames
-	fn = _create_filenames(infile_R1, outfolder)
+	fn = _create_filenames(infile_R1, outfolder, paired_ends)
 	
 	#--------- fastp
 	cmd = pickle.loads(trim_cmd)
-	cmd += ['--in1' , fn['infile_R1'],  '--in2'  , fn['infile_R2']]
-	cmd += ['--out1', fn['outfile_R1'], '--out2' , fn['outfile_R2']]
+	cmd += ['--in1' , fn['infile_R1'], '--out1', fn['outfile_R1']]
 	cmd += ['-j' , fn['outfile_json']]
 	cmd += ['-h' , fn['outfile_html']]
-	
+	if fn['infile_R2'] is not None:
+		cmd += ['--in2'  , fn['infile_R2'], '--out2' , fn['outfile_R2']]
+
 	print(cmd)
 	
 	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
@@ -103,6 +111,9 @@ def trim(conf):
 	SKIP_PREVIOUSLY_COMPLETED=conf['trim']['skip_previously_completed']
 	#the actual trim command
 	TRIM_CMD=conf['trim']['cmd']
+	#single or paired ends
+	PAIRED_ENDS=conf['trim']['paired_ends']
+	
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
 	subprocess.run(cmd_str, shell=True)
@@ -112,7 +123,7 @@ def trim(conf):
 	skipped = 0
 	for infile_R1 in glob.glob(INFOLDER + '/*_R1.fastq.gz'):
 		#should we skip this file?
-		fn = _create_filenames(infile_R1, OUTFOLDER)
+		fn = _create_filenames(infile_R1, OUTFOLDER, PAIRED_ENDS)
 		if os.path.isfile(fn['outfile_R1']) and SKIP_PREVIOUSLY_COMPLETED:
 			skipped += 1
 			print('Skipping previously processed sample ' + fn['core'])
@@ -125,7 +136,8 @@ def trim(conf):
 		args_now = pd.DataFrame({
 			'infile_R1' : [infile_R1], 
 			'outfolder' : [OUTFOLDER],
-			'trim_cmd'  : [pickle.dumps(TRIM_CMD)] 
+			'trim_cmd'  : [pickle.dumps(TRIM_CMD)],
+			'paired_ends' :  PAIRED_ENDS
 		})
 
 		#storing in a single df
