@@ -37,6 +37,7 @@ def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#these values should be boolean
 	conf['align']['skip_previously_completed'] = raw_conf['align'].getboolean('skip_previously_completed') 
+	conf['align']['paired_ends'] = raw_conf['align'].getboolean('paired_ends') 
 
 	#these values should be int
 	conf['align']['cores'] = raw_conf['align'].getint('cores') 
@@ -48,7 +49,7 @@ def interpolate(conf, raw_conf):
 
 	return(conf)
 
-def _do_align(infile_R1, outfolder, bowtie_index):
+def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 	'''this function is designed to be executed in parallel, once per 
 	input fastq R1/R2 files'''
 
@@ -57,8 +58,12 @@ def _do_align(infile_R1, outfolder, bowtie_index):
 	
 	#--------- bowtie2 align
 	cmd = ['bowtie2', '-x', bowtie_index]
-	cmd += ['-1', fn['infile_R1']]
-	cmd += ['-2', fn['infile_R2']]
+	if paired:
+		cmd += ['-1', fn['infile_R1']]
+		cmd += ['-2', fn['infile_R2']]
+	else:
+		cmd += ['-U', fn['infile_R1']]
+		
 	cmd += ['-S', fn['tmp_sam']]
 	with open(fn['log_bowtie2_align'], "w") as fp:
 		fp.write(' '.join(cmd) + '\n')
@@ -158,6 +163,7 @@ def align(conf):
 	CORES=conf['align']['cores']
 	MAX_SAMPLES=conf['align']['max_samples']
 	SKIP_PREVIOUSLY_COMPLETED=conf['align']['skip_previously_completed']
+	PAIRED=conf['align']['paired']
 	
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
@@ -170,7 +176,6 @@ def align(conf):
 		#should we skip this file?
 		fn = _create_filenames(infile_R1, OUTFOLDER)
 		
-		
 		print('Aligning ' + fn['core'])
 		if os.path.isfile(fn['outfile_index']) and SKIP_PREVIOUSLY_COMPLETED:
 			skipped += 1
@@ -179,11 +184,13 @@ def align(conf):
 		
 		#the arguments for the current file. Column order is important,
 		#it should match the order for the parallel function, since 
-		#the arguments are passed as positionals.
+		#the arguments are passed as positionals
 		args_now = pd.DataFrame({
-			'infile_R1' : [infile_R1], 
+			'infile_R1' : [fn['infile_R1']], 
+			'infile_R2' : [fn['infile_R2']], 
 			'outfolder' : [OUTFOLDER], 
-			'bowtie_index' : [BOWTIE_INDEX]
+			'bowtie_index' : [BOWTIE_INDEX],
+			'paired' : [PAIRED]
 		})
 
 		#storing in a single df

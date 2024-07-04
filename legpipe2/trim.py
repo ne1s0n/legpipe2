@@ -23,7 +23,7 @@ def interpolate(conf, raw_conf):
 	#these values should be boolean
 	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
 	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
-	conf['trim']['paired_ends'] = raw_conf['trim'].getboolean('paired_ends') 
+	conf['trim']['paired'] = raw_conf['trim'].getboolean('paired') 
 
 	#these values should be int
 	conf['trim']['cores'] = raw_conf['trim'].getint('cores') 
@@ -75,11 +75,9 @@ def _do_trim(infile_R1, outfolder, trim_cmd, paired_ends):
 	cmd += ['--in1' , fn['infile_R1'], '--out1', fn['outfile_R1']]
 	cmd += ['-j' , fn['outfile_json']]
 	cmd += ['-h' , fn['outfile_html']]
-	if fn['infile_R2'] is not None:
+	if paired_ends:
 		cmd += ['--in2'  , fn['infile_R2'], '--out2' , fn['outfile_R2']]
 
-	print(cmd)
-	
 	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(fn['log'], "w") as fp:
 		fp.write(res.stdout)
@@ -112,7 +110,7 @@ def trim(conf):
 	#the actual trim command
 	TRIM_CMD=conf['trim']['cmd']
 	#single or paired ends
-	PAIRED_ENDS=conf['trim']['paired_ends']
+	PAIRED=conf['trim']['paired']
 	
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
@@ -123,7 +121,7 @@ def trim(conf):
 	skipped = 0
 	for infile_R1 in glob.glob(INFOLDER + '/*_R1.fastq.gz'):
 		#should we skip this file?
-		fn = _create_filenames(infile_R1, OUTFOLDER, PAIRED_ENDS)
+		fn = _create_filenames(infile_R1, OUTFOLDER, PAIRED)
 		if os.path.isfile(fn['outfile_R1']) and SKIP_PREVIOUSLY_COMPLETED:
 			skipped += 1
 			print('Skipping previously processed sample ' + fn['core'])
@@ -137,7 +135,7 @@ def trim(conf):
 			'infile_R1' : [infile_R1], 
 			'outfolder' : [OUTFOLDER],
 			'trim_cmd'  : [pickle.dumps(TRIM_CMD)],
-			'paired_ends' :  PAIRED_ENDS
+			'paired_ends' :  PAIRED
 		})
 
 		#storing in a single df
