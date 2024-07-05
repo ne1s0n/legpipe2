@@ -37,7 +37,7 @@ def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#these values should be boolean
 	conf['align']['skip_previously_completed'] = raw_conf['align'].getboolean('skip_previously_completed') 
-	conf['align']['paired_ends'] = raw_conf['align'].getboolean('paired_ends') 
+	conf['align']['paired'] = raw_conf['align'].getboolean('paired') 
 
 	#these values should be int
 	conf['align']['cores'] = raw_conf['align'].getint('cores') 
@@ -52,7 +52,11 @@ def interpolate(conf, raw_conf):
 def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 	'''this function is designed to be executed in parallel, once per 
 	input fastq R1/R2 files'''
-
+	
+	#because of how this function is invoked, all arguments are converted to string
+	#let's compensate it
+	paired = paired == 'True'
+	
 	#--------- filenames
 	fn = _create_filenames(infile_R1, outfolder)
 	
@@ -65,13 +69,20 @@ def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 		cmd += ['-U', fn['infile_R1']]
 		
 	cmd += ['-S', fn['tmp_sam']]
-	with open(fn['log_bowtie2_align'], "w") as fp:
+	with open(fn['logfile'], "w") as fp:
+		fp.write('\n\n--------- bowtie2 align\n')
+		fp.write('Special bowtie call: -f for single end\n')
+		fp.write('paired: "' + str(paired) + '"\n')
+		fp.write('of type: "' + str(type(paired)) + '"\n')
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- samtools for sam -> bam conversion
 	cmd = ['samtools', 'view']
 	cmd += ['-bS', fn['tmp_sam']]
+	with open(fn['logfile'], "a") as fp:
+		fp.write('\n\n--------- samtools for sam -> bam conversion\n')
+		fp.write(' '.join(cmd) + '\n')
 	with open(fn['tmp_bam'], "w") as fp:
 		subprocess.run(cmd, shell=False, stdout=fp)
 		
@@ -80,27 +91,31 @@ def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 	cmd += ['-I',  fn['tmp_bam']]
 	cmd += ['-O',  fn['tmp_bam_groups']]
 	cmd += ['-LB', 'Whatever', '-PL', 'Illumina', '-PU', 'Whatever', '-SM', fn['core'], '-ID', fn['core']]
-	with open(fn['log_picard_readGroups'], "w") as fp:
+	with open(fn['logfile'], "a") as fp:
+		fp.write('\n\n--------- picard, AddOrReplaceReadGroups\n')
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 
 	#--------- picard, ValidateSamFile
 	cmd = ['java', '-jar', os.environ.get('PICARD'), 'ValidateSamFile']
 	cmd += ['-INPUT', fn['tmp_bam_groups']]
-	with open(fn['log_picard_validation'], "w") as fp:
+	with open(fn['logfile'], "a") as fp:
+		fp.write('\n\n--------- picard, ValidateSamFile\n')
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- samtools, sort
 	cmd = ['samtools', 'sort', fn['tmp_bam_groups']]
 	cmd += ['-o', fn['outfile']]
-	with open(fn['log_samtools_sort'], "w") as fp:
+	with open(fn['logfile'], "a") as fp:
+		fp.write('\n\n--------- samtools, sort\n')
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- samtools, index
 	cmd = ['samtools', 'index', fn['outfile']]
-	with open(fn['log_samtools_index'], "w") as fp:
+	with open(fn['logfile'], "a") as fp:
+		fp.write('\n\n--------- samtools, index\n')
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
@@ -130,11 +145,7 @@ def _create_filenames(infile_R1, outfolder):
 	res['tmp_bam_groups'] = res['tmp_sam'].replace('.sam', '.gr.bam')
 	
 	#log files
-	res['log_bowtie2_align']     = res['tmp_sam'].replace('.sam', '.bowtie2_align.log')
-	res['log_picard_validation'] = res['tmp_sam'].replace('.sam', '.picard_validation.log')
-	res['log_picard_readGroups'] = res['tmp_sam'].replace('.sam', '.picard_readGroups.log')
-	res['log_samtools_sort']     = res['tmp_sam'].replace('.sam', '.samtools_sort.log')
-	res['log_samtools_index']    = res['tmp_sam'].replace('.sam', '.samtools_index.log')
+	res['logfile']     = res['tmp_sam'].replace('.sam', '.align.log')
 	
 	#output file
 	res['outfile'] = res['tmp_sam'].replace('.sam', '.gr.sorted.bam')
@@ -143,7 +154,6 @@ def _create_filenames(infile_R1, outfolder):
 	res['outfile_index'] = res['outfile'] + '.bai'
 	
 	return(res)
-
 
 #----------- ALIGN (public) FUNCTION
 def align(conf):
