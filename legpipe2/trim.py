@@ -68,10 +68,6 @@ def _create_filenames(infile_R1, outfolder, paired_ends):
 def _do_trim(infile_R1, outfolder, trim_cmd, paired_ends):
 	'''executes the trimming for one R1/R2 pair'''
 	
-	#because of how this function is invoked, all arguments are converted to string
-	#let's compensate it
-	paired_ends = paired_ends == 'True'
-	
 	#--------- filenames
 	fn = _create_filenames(infile_R1, outfolder, paired_ends)
 	
@@ -120,7 +116,7 @@ def trim(conf):
 	#room for output
 	cmd_str = "mkdir -p " + OUTFOLDER
 	subprocess.run(cmd_str, shell=True)
-
+	
 	#collecting all the arguments for the parallel execution in a pandas df
 	args = None
 	skipped = 0
