@@ -6,6 +6,7 @@ import glob
 import os
 import common
 import shlex
+from common import fn
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
@@ -49,7 +50,7 @@ def demultiplex(conf):
 	LOG_FILE= OUTFOLDER + '/axe_log.txt'
 
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = 'mkdir -p ' + fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 	
 	#a little interface
@@ -60,7 +61,6 @@ def demultiplex(conf):
 	print(' - stats file : ' + STATS_FILE)
 	print(' - log file   : ' + LOG_FILE)
 
-	#paired end demux
 	print('\nNow demultiplexing with axe demux, paired end')
 	
 	#building the command
