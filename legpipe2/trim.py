@@ -117,10 +117,17 @@ def trim(conf):
 	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 	
+	#collecting infiles
+	infiles_R1 = glob.glob(INFOLDER + '/*_R1.fastq.gz')
+	
+	#interface
+	print('Infolder: ' + INFOLDER)
+	print('Found *_R1.fastq.gz files: ' + str(len(infiles_R1)))
+	
 	#collecting all the arguments for the parallel execution in a pandas df
 	args = None
 	skipped = 0
-	for infile_R1 in glob.glob(INFOLDER + '/*_R1.fastq.gz'):
+	for infile_R1 in infiles_R1:
 		#should we skip this file?
 		fn = _create_filenames(infile_R1, OUTFOLDER, PAIRED)
 		if os.path.isfile(fn['outfile_R1']) and SKIP_PREVIOUSLY_COMPLETED:
