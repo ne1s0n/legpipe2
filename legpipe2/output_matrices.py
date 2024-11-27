@@ -84,7 +84,7 @@ def output_matrices(conf):
 	OUTFILE_MATRIX_DP = OUTFOLDER + '/matrix_DP.csv.gz'
 	
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 	
 	#reference links, for future

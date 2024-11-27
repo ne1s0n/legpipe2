@@ -62,7 +62,7 @@ def post_call_filtering(conf):
 	LOGFILE = OUTFOLDER + '/post_call_filtering.log'
 	
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 
 	

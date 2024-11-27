@@ -114,7 +114,7 @@ def trim(conf):
 	PAIRED=conf['trim']['paired']
 	
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 	
 	#collecting all the arguments for the parallel execution in a pandas df

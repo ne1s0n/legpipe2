@@ -44,8 +44,8 @@ def genome_index(conf):
 	# ------------ bowtie
 	#bowtie needs to run in the reference genome folder, so that
 	#all the created files stay there
-	cmd_str = 'cd ' + os.path.dirname(REFERENCE_FILE) + '; '
-	cmd_str += 'bowtie2-build ' + REFERENCE_FILE + ' ' + BOWTIE_INDEX
+	cmd_str = 'cd ' + common.fn(os.path.dirname(REFERENCE_FILE)) + '; '
+	cmd_str += 'bowtie2-build ' + common.fn(REFERENCE_FILE) + ' ' + common.fn(BOWTIE_INDEX)
 	print(cmd_str)
 	subprocess.run(cmd_str, shell=True)
 

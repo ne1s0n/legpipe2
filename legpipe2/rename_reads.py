@@ -52,7 +52,7 @@ def rename_reads(conf):
 	OUTFOLDER=conf['rename_reads']['outfolder']
 	
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 
 	#for each infolder
@@ -65,5 +65,5 @@ def rename_reads(conf):
 		infiles = glob.glob(infolder + '/*.fastq.gz')
 		for infile in infiles:
 			#creating the links
-			cmd_str = "ln --symbolic " + infile + ' ' + OUTFOLDER + '/' + OUTFILE_PREFIXES[i] + os.path.basename(infile) 
+			cmd_str = "ln --symbolic " + common.fn(infile) + ' ' + common.fn(OUTFOLDER + '/' + OUTFILE_PREFIXES[i] + os.path.basename(infile))
 			subprocess.run(cmd_str, shell=True)

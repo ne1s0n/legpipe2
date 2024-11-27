@@ -41,7 +41,7 @@ def subsample(conf):
 	TOOL=conf['subsample']['tool']
 
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 
 	#a bit of interface
@@ -60,10 +60,10 @@ def subsample(conf):
 		#building the command
 		if TOOL == 'seqtk':
 			#example: seqtk sample -s 123 plate12_demuxed/1A10_R1.fastq.gz 1000          | gzip > foo.fq.gz
-			cmd_str = "seqtk sample -s " + str(SEED) + ' ' + infile + ' ' + str(READS) + ' | gzip > ' + outfile
+			cmd_str = "seqtk sample -s " + str(SEED) + ' ' + common.fn(infile) + ' ' + str(READS) + ' | gzip > ' + common.fn(outfile)
 		else:		
 			#example: zcat plate12_demuxed/1A10_R1.fastq.gz | head -n lines | gzip > foo.fq.gz
-			cmd_str = 'zcat ' + infile + ' | head -n ' + str(READS) + ' | gzip > ' + outfile
+			cmd_str = 'zcat ' + common.fn(infile) + ' | head -n ' + str(READS) + ' | gzip > ' + common.fn(outfile)
 		
 		#runnning the command
 		subprocess.run(cmd_str, shell=True)

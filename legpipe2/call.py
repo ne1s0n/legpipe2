@@ -115,11 +115,11 @@ def call(conf):
 		print('Doing a DRY_RUN (not really calling anything)')
 
 	#tmp folder
-	cmd = "mkdir -p " + TMP_FOLDER
+	cmd = "mkdir -p " + common.fn(TMP_FOLDER)
 	subprocess.run(cmd, shell=True)
 	
 	#room for output
-	cmd = "mkdir -p " + OUTFOLDER
+	cmd = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd, shell=True)
 
 
@@ -140,7 +140,7 @@ def call(conf):
 		gvcf_list.append(fn['gvcf'])
 		
 		#room for result
-		cmd = "mkdir -p " + fn['outfolder_GVCF']
+		cmd = "mkdir -p " + common.fn(fn['outfolder_GVCF'])
 		subprocess.run(cmd, shell=True)
 		
 		#should we skip this file?
