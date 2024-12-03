@@ -63,7 +63,9 @@ def rename_reads(conf):
 		
 		#for each fastq file
 		infiles = glob.glob(infolder + '/*.fastq.gz')
+		print('Creating softlinks for ' + str(len(infiles)) + ' files')
 		for infile in infiles:
 			#creating the links
 			cmd_str = "ln --symbolic " + common.fn(infile) + ' ' + common.fn(OUTFOLDER + '/' + OUTFILE_PREFIXES[i] + os.path.basename(infile))
+			print(cmd_str)
 			subprocess.run(cmd_str, shell=True)
