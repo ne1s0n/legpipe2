@@ -7,7 +7,7 @@
 #to install
 
 #software base folder, where to save stuff that is not installed via apt
-LEGPIPE_ROOT='~/software'
+LEGPIPE_ROOT="~/software"
 mkdir -p "$LEGPIPE_ROOT"
 
 #we add software paths to ~/.bashrc
@@ -26,7 +26,8 @@ sudo apt install -y fastp
 echo "------------------ python install"
 sudo apt install -y python3
 sudo apt install -y python3-pip
-python -m venv "$LEGPIPE_ROOT"/legpipe_venv
+sudo apt install python3.12-venv
+python3 -m venv "$LEGPIPE_ROOT"/legpipe_venv
 source "$LEGPIPE_ROOT"/legpipe_venv/bin/activate
 pip install pandas
 pip install Bio
