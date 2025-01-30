@@ -17,11 +17,13 @@ import subprocess
 import os
 import gzip
 
-def validate(conf):
-	'''validate incoming config parameters from .ini file, plus environmental variables'''
-	if not os.path.exists(conf['output_matrices']['infile']):
-		msg = 'Input file does not exist: ' + conf['output_matrices']['infile']
-		raise FileNotFoundError(msg)
+def validate(conf, runtime = False):
+	'''validate incoming config parameters from .ini file, plus environmental variables.
+	Validation at runtime requires all files to be ready'''
+	if runtime:
+		if not os.path.exists(conf['output_matrices']['infile']):
+			msg = 'Input file does not exist: ' + conf['output_matrices']['infile']
+			raise FileNotFoundError(msg)
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -44,8 +46,13 @@ def _split_AD(infile):
 					#splitting again
 					for p in pieces:
 						cnt = p.split(',')
-						fp_ref.write(cnt[0] + ' ')
-						fp_alt.write(cnt[1] + ' ')
+						if len(cnt) == 2:
+							fp_ref.write(cnt[0] + ' ')
+							fp_alt.write(cnt[1] + ' ')
+						else:
+							#missing data or something similarly unparsable
+							fp_ref.write(' ')
+							fp_alt.write(' ')
 					fp_ref.write('\n')
 					fp_alt.write('\n')
 
@@ -62,6 +69,8 @@ def output_matrices(conf):
 		print('SKIPPED')
 		return(None)
 	
+	#let's check if all required files are here
+	validate(conf=conf, runtime=True) 
 	#core config
 	INFILE=conf['output_matrices']['infile']
 	OUTFOLDER=conf['output_matrices']['outfolder']
@@ -75,7 +84,7 @@ def output_matrices(conf):
 	OUTFILE_MATRIX_DP = OUTFOLDER + '/matrix_DP.csv.gz'
 	
 	#room for output
-	cmd_str = "mkdir -p " + OUTFOLDER
+	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
 	subprocess.run(cmd_str, shell=True)
 	
 	#reference links, for future

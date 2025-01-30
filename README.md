@@ -2,6 +2,13 @@
 
 The SNP calling pipeline used at CREA-ZA (Lodi, Italy). Main application is legumes (diploid and tetraploid) and restricted sequencing (mainly Genotyping By Sequencing). You can use it for everything else, though.
 
+## Main features
+
+- clean separation in modules (alignment, trimmin, SNP calling, ...)
+- each module can be (re)executed easily, carries its own configuration
+- easy to hack. You don't like a module and want to improve it? Just go to the corresponding file
+- internally use of [GVCF workflow](https://gatk.broadinstitute.org/hc/en-us/articles/360035531812-GVCF-Genomic-Variant-Call-Format) from GATK/HaplotypeCaller suite, allowing for low-memory fast calling
+
 ## Status
 
 Usable.
@@ -34,8 +41,8 @@ Nothing :)
 
 ### Functionalities
 
-Checks and features that ensure the pipeline fails gracefully
-when something is wrong:
+I'd like to implement the following checks and features to ensure 
+that the pipeline fails gracefully when something goes wrong:
 
 - support both .fa.gz and .fasta.gz genome files (see in particular genome indexing module)
 - check if the reference genome is gzipped and not bgzipped
@@ -43,8 +50,7 @@ when something is wrong:
 
 ### Bugs
 
-- validation for post_call_filtering step looks for a vcf which may not be there
-  yet if we are running the whole pipeline and not one step at a time
+None known :)
 
 ### Wishlist
 

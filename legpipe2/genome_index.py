@@ -6,6 +6,7 @@ import os
 import common
 from Bio import SeqIO
 import gzip
+import re
 
 def validate(conf):
 	'''validate incoming config parameters from .ini file and env variables'''
@@ -43,8 +44,8 @@ def genome_index(conf):
 	# ------------ bowtie
 	#bowtie needs to run in the reference genome folder, so that
 	#all the created files stay there
-	cmd_str = 'cd ' + os.path.dirname(REFERENCE_FILE) + '; '
-	cmd_str += 'bowtie2-build ' + REFERENCE_FILE + ' ' + BOWTIE_INDEX
+	cmd_str = 'cd ' + common.fn(os.path.dirname(REFERENCE_FILE)) + '; '
+	cmd_str += 'bowtie2-build ' + common.fn(REFERENCE_FILE) + ' ' + common.fn(BOWTIE_INDEX)
 	print(cmd_str)
 	subprocess.run(cmd_str, shell=True)
 
@@ -54,8 +55,10 @@ def genome_index(conf):
 	subprocess.run(cmd, shell=False)
 	
 	# ------------ picard
-	#TODO add support for .fa.gz, .fasta.gz, case sensitivity etc
-	picard_out = REFERENCE_FILE.replace('.fa.gz', '.dict')
+	#substitute .fasta.gz, .fa.gz and all the upper/lower case variants with .dict
+	picard_out = re.sub('(?i)\.fasta\.gz$', '.dict', REFERENCE_FILE)
+	picard_out = re.sub('(?i)\.fa\.gz$', '.dict', picard_out)
+	
 	cmd = ['java', '-jar', os.environ.get('PICARD'), 'CreateSequenceDictionary']
 	cmd += ['-R',  REFERENCE_FILE]
 	cmd += ['-O',  picard_out]
