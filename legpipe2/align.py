@@ -37,7 +37,6 @@ def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#these values should be boolean
 	conf['align']['skip_previously_completed'] = raw_conf['align'].getboolean('skip_previously_completed') 
-	conf['align']['paired'] = raw_conf['align'].getboolean('paired') 
 
 	#these values should be int
 	conf['align']['cores'] = raw_conf['align'].getint('cores') 

@@ -23,7 +23,6 @@ def interpolate(conf, raw_conf):
 	#these values should be boolean
 	conf['trim']['dry_run'] = raw_conf['trim'].getboolean('dry_run') 
 	conf['trim']['skip_previously_completed'] = raw_conf['trim'].getboolean('skip_previously_completed') 
-	conf['trim']['paired'] = raw_conf['trim'].getboolean('paired') 
 
 	#these values should be int
 	conf['trim']['cores'] = raw_conf['trim'].getint('cores') 
