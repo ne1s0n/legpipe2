@@ -11,13 +11,16 @@ from common import fn
 def validate(conf):
 	'''validate incoming config parameters from .ini file'''
 
-	#checking if files/paths exist
+	#checking if files/paths exist, forward reads
 	if not os.path.exists(conf['demultiplex']['infile_r1']):
 		msg = 'Input file demultiplex/infile_r1 does not exist: ' + conf['demultiplex']['infile_r1']
 		raise FileNotFoundError(msg)
-	if not os.path.exists(conf['demultiplex']['infile_r2']):
-		msg = 'Input file demultiplex/infile_r2 does not exist: ' + conf['demultiplex']['infile_r2']
-		raise FileNotFoundError(msg)
+	#if paired, let's check also the reverse
+	if 	conf['demultiplex']['paired']:
+		if not os.path.exists(conf['demultiplex']['infile_r2']):
+			msg = 'Input file demultiplex/infile_r2 does not exist: ' + conf['demultiplex']['infile_r2']
+			raise FileNotFoundError(msg)
+	#check the barcode file
 	if not os.path.exists(conf['demultiplex']['barcodes']):
 		msg = 'Input file demultiplex/barcodes does not exist: ' + conf['demultiplex']['barcodes']
 		raise FileNotFoundError(msg)
@@ -39,8 +42,10 @@ def demultiplex(conf):
 		return(None)
 
 	#local copies of configuration variables, to have a leaner code
+	PAIRED=conf['demultiplex']['paired']
 	INFILE_R1=conf['demultiplex']['infile_r1'] # multiplexed data, reads 1
-	INFILE_R2=conf['demultiplex']['infile_r2'] # multiplexed data, reads 2
+	if PAIRED:
+		INFILE_R2=conf['demultiplex']['infile_r2'] # multiplexed data, reads 2
 	BARCODES=conf['demultiplex']['barcodes']
 	OUTFOLDER=conf['demultiplex']['outfolder']
 	DEMUX_CMD=conf['demultiplex']['cmd']
@@ -55,18 +60,23 @@ def demultiplex(conf):
 	
 	#a little interface
 	print(' - infile R1  : ' + INFILE_R1)
-	print(' - infile R2  : ' + INFILE_R2)
+	if PAIRED:
+		print(' - infile R2  : ' + INFILE_R2)
 	print(' - barcodes   : ' + BARCODES)
 	print(' - outfolder  : ' + OUTFOLDER)
 	print(' - stats file : ' + STATS_FILE)
 	print(' - log file   : ' + LOG_FILE)
 
-	print('\nNow demultiplexing with axe demux, paired end')
+	if not PAIRED:
+		print('\nNow demultiplexing with axe demux, single end')
+	else:
+		print('\nNow demultiplexing with axe demux, paired end')
 	
 	#building the command
 	cmd = DEMUX_CMD
 	cmd += ['-f', INFILE_R1]
-	cmd += ['-r', INFILE_R2]
+	if PAIRED:
+		cmd += ['-r', INFILE_R2]
 	cmd += ['-F', OUTFOLDER + '/']
 	cmd += ['-R', OUTFOLDER + '/']
 	cmd += ['-b', BARCODES]
