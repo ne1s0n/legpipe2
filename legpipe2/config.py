@@ -38,7 +38,7 @@ def read_config(infile):
 		res[section] = {}
 		for key in config[section]:
 			#some on-the-fly interpolations for common values in all sections
-			if key == 'run_this':
+			if key in ['run_this', 'paired']:
 				res[section][key] = config[section].getboolean(key)	
 			else:
 				#just copying the value
