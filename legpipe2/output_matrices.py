@@ -116,7 +116,7 @@ def output_matrices(conf):
 			subprocess.run(cmd2, shell=False, stdin = p1.stdout, stdout=out_fp, stderr=log_fp)
 
 	#make a BED file: chr, pos (0-based), end pos (1-based), id
-	#bcftools view --apply-filters PASS filtered_SNPs_haplo.vcf.gz | bcftools query -f'%CHROM\t%POS0\t%END\t%ID\n' file.bcf > SNP_info.bed
+	#bcftools view --apply-filters PASS filtered_SNPs_haplo.vcf.gz | bcftools query -f'%CHROM\t%POS0\t%END\t%ID\n' > SNP_info.bed
 	cmd1 = ['bcftools', 'view', '--apply-filters', 'PASS', INFILE]
 	cmd2 = ['bcftools', 'query', '-f', '%CHROM\t%POS0\t%END\t%ID\n']
 	with open(LOGFILE, 'a') as log_fp:
