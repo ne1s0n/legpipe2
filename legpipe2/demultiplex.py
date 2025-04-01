@@ -75,12 +75,15 @@ def demultiplex(conf):
 	#building the command
 	cmd = DEMUX_CMD
 	cmd += ['-f', INFILE_R1]
+	cmd += ['-F', OUTFOLDER + '/']
 	if PAIRED:
 		cmd += ['-r', INFILE_R2]
-	cmd += ['-F', OUTFOLDER + '/']
-	cmd += ['-R', OUTFOLDER + '/']
+		cmd += ['-R', OUTFOLDER + '/']
 	cmd += ['-b', BARCODES]
 	cmd += ['-t', STATS_FILE]
+	
+	print('Executing:')
+	print(' '.join(cmd))
 	
 	res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 	with open(LOG_FILE, "w") as fp:
