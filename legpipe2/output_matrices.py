@@ -1,16 +1,36 @@
-#from the filtered vcf file, output data in several matrices
-#fornat
-
-
-
-#GT:AD:DP:GQ:PGT:PID:PL:PS       
-#0/0:4,0:4:12:.:.:0,12,117       
-#0/0:1,0:1:3:.:.:0,3,15  
-#0/0:0,0:0:0:.:.:0,0,0   
-#0/0:5,0:5:15:.:.:0,15,197       
-#0/0:3,0:3:9:.:.:0,9,99  
-#0/0:5,0:5:0:.:.:0,0,113 
-#0/0:5,0:5:15:.:.:0,15,156
+#from the filtered vcf file, output data in several matrices formats
+#
+#Output:
+# - matrix_GT.csv.gz : most likely genotypes. Alleles are separated 
+#                      by / or |, following the scheme (for diploid):
+#                      0/0 -> the sample is a homozygous reference
+#                      0/1 -> the sample is heterozygous (carries both reference and alternate alleles)
+#                      1/1 -> the sample is a homozygous alternate
+#                      ./. -> No genotype called or missing genotype
+#                      In case of a polyploid call the scheme is the same,
+#                      but with more digits. E.g. a tetraploid will
+#                      have 0/0/0/0 or ./././. or other combinations
+# - matrix_DP.csv.gz : overall read depth from all target samples
+#                      supporting the genotype call.
+# - matrix_AD.csv.gz : refers to the allele depth. AD reports the 
+#                      informative reads supporting each allele. AD may 
+#                      not always sum to DP.
+# - matrix_countRef.csv.gz : from AD, counting the supporting reads 
+#                            for the SECOND allele (reference). Meaningful
+#                            only for diploid calls
+# - matrix_countAlt.csv.gz : from AD, counting the supporting reads 
+#                            for the SECOND allele (alternative). Meaningful
+#                            only for diploid calls
+#
+#example of vcf file:
+# GT:AD:DP:GQ:PGT:PID:PL:PS       
+# 0/0:4,0:4:12:.:.:0,12,117       
+# 0/0:1,0:1:3:.:.:0,3,15  
+# 0/0:0,0:0:0:.:.:0,0,0   
+# 0/0:5,0:5:15:.:.:0,15,197       
+# 0/0:3,0:3:9:.:.:0,9,99  
+# 0/0:5,0:5:0:.:.:0,0,113 
+# 0/0:5,0:5:15:.:.:0,15,156
 
 import common
 import subprocess
@@ -82,6 +102,7 @@ def output_matrices(conf):
 	OUTFILE_SNP_BED   = OUTFOLDER + '/SNP_info.bed'
 	OUTFILE_MATRIX_AD = OUTFOLDER + '/matrix_AD.csv.gz'
 	OUTFILE_MATRIX_DP = OUTFOLDER + '/matrix_DP.csv.gz'
+	OUTFILE_MATRIX_GT = OUTFOLDER + '/matrix_GT.csv.gz'
 	
 	#room for output
 	cmd_str = "mkdir -p " + common.fn(OUTFOLDER)
@@ -156,6 +177,19 @@ def output_matrices(conf):
 		log_fp.write(' '.join(cmd3) + ' > ' + OUTFILE_MATRIX_DP + '\n')
 		log_fp.flush()
 		with open(OUTFILE_MATRIX_DP, "w") as out_fp:
+			p1 = subprocess.Popen(cmd1, stdout = subprocess.PIPE, stderr = log_fp)
+			p2 = subprocess.Popen(cmd2, stdin = p1.stdout, stderr = log_fp, stdout = subprocess.PIPE)
+			p3 = subprocess.run(cmd3, stdin = p2.stdout, stderr = log_fp, stdout = out_fp)
+
+	#same thing, but for GT matrix
+	cmd2 = ['bcftools', 'query', '-f', '[%GT ]\n']
+	with open(LOGFILE, 'a') as log_fp:
+		log_fp.write('------------------------\n')
+		log_fp.write(' '.join(cmd1) + ' | ')
+		log_fp.write(' '.join(cmd2) + ' | ')
+		log_fp.write(' '.join(cmd3) + ' > ' + OUTFILE_MATRIX_GT + '\n')
+		log_fp.flush()
+		with open(OUTFILE_MATRIX_GT, "w") as out_fp:
 			p1 = subprocess.Popen(cmd1, stdout = subprocess.PIPE, stderr = log_fp)
 			p2 = subprocess.Popen(cmd2, stdin = p1.stdout, stderr = log_fp, stdout = subprocess.PIPE)
 			p3 = subprocess.run(cmd3, stdin = p2.stdout, stderr = log_fp, stdout = out_fp)
