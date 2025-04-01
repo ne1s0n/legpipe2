@@ -17,6 +17,8 @@ import os
 import pandas as pd
 import common
 import sys
+from pathlib import Path
+import csv
 
 #instead of basic Pool, for complicated reasons linked to shared memory
 #that would prevent pandas to be pickable, we use ThreadPool 
@@ -31,7 +33,6 @@ def validate(conf):
 	if not os.path.exists(conf['align']['reference_file']):
 		msg = 'Reference file does not exist: ' + conf['align']['reference_file']
 		raise FileNotFoundError(msg)
-
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
@@ -154,6 +155,61 @@ def _create_filenames(infile_R1, outfolder):
 	
 	return(res)
 
+def _parse_bwa_log(infile):
+	"""parses a logfile coming from bwa, returns a dict with aligning stats"""
+	
+	#sample name is extracted from infile
+	sample_name = Path(infile).name
+	sample_name = sample_name[:-10] #removing the ".align.log" suffix
+	
+	
+	#example of the file content:
+	#3321549 reads; of these:
+	#  3321549 (100.00%) were unpaired; of these:
+	#    1174172 (35.35%) aligned 0 times
+	#    985356 (29.67%) aligned exactly 1 time
+	#    1162021 (34.98%) aligned >1 times
+	#64.65% overall alignment rate
+	
+	#read the first line for total reads
+	with open(infile, mode="r") as fp:
+		reads = int(fp.readline().split()[0])
+		fp.readline()
+		fp.readline()
+		fp.readline()
+		fp.readline()
+		rate = fp.readline().split()[0]
+		#rate is now like 60.73%
+		rate = float(rate[:-1]) / 100
+	
+	return ({
+		'sample' : sample_name,
+		'total_reads' : reads,
+		'alignment_rate' : rate
+	})
+
+def _create_statfile(infolder, outfile):
+	"""
+	parses all the logfile created by bwa and saves a single
+	.csv output file with the extracted stats
+	"""
+	#retrieving the list of alignment logs
+	folder_path = Path(infolder)
+	files = list(Path(infolder).glob("*.align.log"))
+
+	#room for storing the stats
+	res = []
+
+	#parsing each log file
+	for f in files:
+		res.append(_parse_bwa_log(f))
+
+	#saving to output file
+	with open(outfile, mode="w", newline="") as fp:
+		writer = csv.DictWriter(fp, fieldnames=res[0].keys())
+		writer.writeheader()  # Write the header
+		writer.writerows(res)  # Write the data
+
 #----------- ALIGN (public) FUNCTION
 def align(conf):
 	#interface
@@ -232,3 +288,7 @@ def align(conf):
 	print('Total sample processed: ' + str(cnt))
 	print('Skipped because previous runs: ' + str(skipped))
 
+	#extracting alignment stats into a file
+	statfile = OUTFOLDER + '/alignment_stats.csv'
+	_create_statfile(infolder=OUTFOLDER, outfile=statfile)
+	print('Statistics on alignments saved to ' + statfile)
