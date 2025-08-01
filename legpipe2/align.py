@@ -68,9 +68,6 @@ def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 	cmd += ['-S', fn['tmp_sam']]
 	with open(fn['logfile'], "w") as fp:
 		fp.write('\n\n--------- bowtie2 align\n')
-		fp.write('Special bowtie call: -f for single end\n')
-		fp.write('paired: "' + str(paired) + '"\n')
-		fp.write('of type: "' + str(type(paired)) + '"\n')
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
@@ -117,9 +114,9 @@ def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- cleanup of intermediate files
-	subprocess.run(['rm', fn['tmp_sam']], shell=False)
-	subprocess.run(['rm', fn['tmp_bam']], shell=False)
-	subprocess.run(['rm', fn['tmp_bam_groups']], shell=False)
+	#subprocess.run(['rm', fn['tmp_sam']], shell=False)
+	#subprocess.run(['rm', fn['tmp_bam']], shell=False)
+	#subprocess.run(['rm', fn['tmp_bam_groups']], shell=False)
 
 	#--------- done
 	return(fn['core'])
