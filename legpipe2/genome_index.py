@@ -23,6 +23,10 @@ def validate(conf):
 
 def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
+	
+	#these values should be int
+	conf['genome_index']['cores'] = raw_conf['genome_index'].getint('cores') 
+
 	return(conf)
 
 def genome_index(conf):
@@ -40,12 +44,13 @@ def genome_index(conf):
 	REFERENCE_FILE=conf['genome_index']['reference_file']
 	BOWTIE_INDEX=conf['genome_index']['bowtie_index']
 	REGION_LENGTHS_FILE=conf['genome_index']['region_lengths_file']
+	CORES=str(conf['genome_index']['cores'])
 		
 	# ------------ bowtie
 	#bowtie needs to run in the reference genome folder, so that
 	#all the created files stay there
 	cmd_str = 'cd ' + common.fn(os.path.dirname(REFERENCE_FILE)) + '; '
-	cmd_str += 'bowtie2-build ' + common.fn(REFERENCE_FILE) + ' ' + common.fn(BOWTIE_INDEX)
+	cmd_str += 'bowtie2-build --threads ' + CORES + ' ' + common.fn(REFERENCE_FILE) + ' ' + common.fn(BOWTIE_INDEX)
 	print(cmd_str)
 	subprocess.run(cmd_str, shell=True)
 
