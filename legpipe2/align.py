@@ -38,6 +38,7 @@ def interpolate(conf, raw_conf):
 	'''transform incoming config parameters from .ini file'''
 	#these values should be boolean
 	conf['align']['skip_previously_completed'] = raw_conf['align'].getboolean('skip_previously_completed') 
+	conf['align']['paired'] = raw_conf['align'].getboolean('paired') 
 
 	#these values should be int
 	conf['align']['cores'] = raw_conf['align'].getint('cores') 
@@ -52,10 +53,6 @@ def interpolate(conf, raw_conf):
 def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 	'''this function is designed to be executed in parallel, once per 
 	input fastq R1/R2 files'''
-	
-	#because of how this function is invoked, all arguments are converted to string
-	#let's compensate it
-	paired = paired == 'True'
 	
 	#--------- filenames
 	fn = _create_filenames(infile_R1, outfolder)
@@ -112,8 +109,8 @@ def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 		fp.write(' '.join(cmd) + '\n')
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
-	#--------- samtools, index
-	cmd = ['samtools', 'index', fn['outfile']]
+	#--------- samtools, index, CSI index format
+	cmd = ['samtools', 'index', '--csi', fn['outfile']]
 	with open(fn['logfile'], "a") as fp:
 		fp.write('\n\n--------- samtools, index\n')
 		fp.write(' '.join(cmd) + '\n')
@@ -150,8 +147,10 @@ def _create_filenames(infile_R1, outfolder):
 	#output file
 	res['outfile'] = res['tmp_sam'].replace('.sam', '.gr.sorted.bam')
 	
-	#index for output file
-	res['outfile_index'] = res['outfile'] + '.bai'
+	#index for output file (we prefer csi over bai because of size limitations
+	#in bai format (the BAI index format can handle individual chromosomes
+	#up to 512 Mbp (2^29 bases) in length, which can be not enough)
+	res['outfile_index'] = res['outfile'] + '.csi'
 	
 	return(res)
 
