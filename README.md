@@ -28,6 +28,12 @@ Since it's python3 all the way down, you just have to clone the repo. Then do a:
 
 The configuration file is the core of the pipeline, since it dictates what steps are going to be executed and on what data. A lot of interesting details are provided in the [sample_config.ini](sample_config.ini) example file.
 
+## Citing Legpipe2
+
+Please cite:
+
+> Nazzicari, Nelson, et al. "The effect of genome parametrization and SNP marker subsetting on genomic selection in autotetraploid alfalfa." Genes 15.4 (2024): 449.
+
 ## Main inspirations
 
 - [dDocent](https://github.com/jpuritz/dDocent)
