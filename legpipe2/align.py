@@ -157,13 +157,33 @@ def _parse_bwa_log(infile):
 	sample_name = sample_name[:-10] #removing the ".align.log" suffix
 	
 	
-	#example of the file content:
+	#example of the file content, for unpaired reads (single end):
 	#3321549 reads; of these:
 	#  3321549 (100.00%) were unpaired; of these:
 	#    1174172 (35.35%) aligned 0 times
 	#    985356 (29.67%) aligned exactly 1 time
 	#    1162021 (34.98%) aligned >1 times
 	#64.65% overall alignment rate
+	
+	#example of the file content, for paired reads:
+	#1489798 reads; of these:
+	#  1489798 (100.00%) were paired; of these:
+	#	244747 (16.43%) aligned concordantly 0 times
+	#	332442 (22.31%) aligned concordantly exactly 1 time
+	#	912609 (61.26%) aligned concordantly >1 times
+	#	----
+	#	244747 pairs aligned concordantly 0 times; of these:
+	#	  25343 (10.35%) aligned discordantly 1 time
+	#	----
+	#	219404 pairs aligned 0 times concordantly or discordantly; of these:
+	#	  438808 mates make up the pairs; of these:
+	#		235207 (53.60%) aligned 0 times
+	#		25505 (5.81%) aligned exactly 1 time
+	#		178096 (40.59%) aligned >1 times
+	#92.11% overall alignment rate
+	
+	#TODO: now only single ends are corretly parsed. Paired ends crashes
+
 	
 	#read the first line for total reads
 	with open(infile, mode="r") as fp:
