@@ -114,9 +114,9 @@ def _do_align(infile_R1, infile_R2, outfolder, bowtie_index, paired):
 		subprocess.run(cmd, shell=False, stdout=fp, stderr=subprocess.STDOUT, text=True)
 	
 	#--------- cleanup of intermediate files
-	#subprocess.run(['rm', fn['tmp_sam']], shell=False)
-	#subprocess.run(['rm', fn['tmp_bam']], shell=False)
-	#subprocess.run(['rm', fn['tmp_bam_groups']], shell=False)
+	subprocess.run(['rm', fn['tmp_sam']], shell=False)
+	subprocess.run(['rm', fn['tmp_bam']], shell=False)
+	subprocess.run(['rm', fn['tmp_bam_groups']], shell=False)
 
 	#--------- done
 	return(fn['core'])
