@@ -61,8 +61,8 @@ def genome_index(conf):
 	
 	# ------------ picard
 	#substitute .fasta.gz, .fa.gz and all the upper/lower case variants with .dict
-	picard_out = re.sub('(?i)\.fasta\.gz$', '.dict', REFERENCE_FILE)
-	picard_out = re.sub('(?i)\.fa\.gz$', '.dict', picard_out)
+	picard_out = re.sub(r'(?i)\.fasta\.gz$', '.dict', REFERENCE_FILE)
+	picard_out = re.sub(r'(?i)\.fa\.gz$', '.dict', picard_out)
 	
 	cmd = ['java', '-jar', os.environ.get('PICARD'), 'CreateSequenceDictionary']
 	cmd += ['-R',  REFERENCE_FILE]
