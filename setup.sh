@@ -22,6 +22,10 @@ sudo apt-get upgrade
 sudo apt install -y parallel
 sudo apt install -y fastp
 
+#axe demultiplexer
+echo "------------------ axe demultiplexer"
+sudo apt install -y axe-demultiplexer
+
 #python3 and modules
 echo "------------------ python install"
 sudo apt install -y python3
