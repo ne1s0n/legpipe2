@@ -30,7 +30,7 @@ sudo apt install -y axe-demultiplexer
 echo "------------------ python install"
 sudo apt install -y python3
 sudo apt install -y python3-pip
-sudo apt install python3.12-venv
+sudo apt install -y python3.12-venv
 python3 -m venv "$LEGPIPE_ROOT"/legpipe_venv
 source "$LEGPIPE_ROOT"/legpipe_venv/bin/activate
 pip install pandas
