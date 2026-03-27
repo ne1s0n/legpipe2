@@ -151,11 +151,12 @@ def _create_filenames(infile_R1, outfolder):
 
 def _parse_bwa_log(infile):
 	"""parses a logfile coming from bwa, returns a dict with aligning stats"""
+	result = {}
 	
 	#sample name is extracted from infile
 	sample_name = Path(infile).name
 	sample_name = sample_name[:-10] #removing the ".align.log" suffix
-	
+	result['sample_name'] = sample_name
 	
 	#example of the file content, for unpaired reads (single end):
 	#3321549 reads; of these:
@@ -182,25 +183,24 @@ def _parse_bwa_log(infile):
 	#		178096 (40.59%) aligned >1 times
 	#92.11% overall alignment rate
 	
-	#TODO: now only single ends are corretly parsed. Paired ends crashes
-
-	
-	#read the first line for total reads
 	with open(infile, mode="r") as fp:
-		reads = int(fp.readline().split()[0])
-		fp.readline()
-		fp.readline()
-		fp.readline()
-		fp.readline()
-		rate = fp.readline().split()[0]
-		#rate is now like 60.73%
-		rate = float(rate[:-1]) / 100
+		#read the first line for total reads
+		result['reads'] = int(fp.readline().split()[0])
+		
+		#look after a line containing "overall alignment rate"
+		result['alignment_rate'] = None
+		for line in fp:
+			#did we find the line we were looking for?
+			if  'overall alignment rate' in line:
+				#paring
+				rate = line.split()[0]
+				#rate is now like 60.73%
+				result['alignment_rate'] = float(rate[:-1]) / 100
+				#we are done with the log
+				break
 	
-	return ({
-		'sample' : sample_name,
-		'total_reads' : reads,
-		'alignment_rate' : rate
-	})
+	#done	
+	return (result)
 
 def _create_statfile(infolder, outfile):
 	"""
