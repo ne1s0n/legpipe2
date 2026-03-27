@@ -38,8 +38,9 @@ if __name__ == "__main__":
 	print('Welcome to Legpipe2!')
 	
 	#very simple command line interface
-	if len(sys.argv) != 2:
+	if len(sys.argv) < 2:
 		print('Usage: python3 path/to/legpipe2.py config_file.ini')
+		print('(extra arguments will be ignored)')
 		exit(0)
 	
 	#invoking legpipe
