@@ -7,13 +7,13 @@
 #to install
 
 #software base folder, where to save stuff that is not installed via apt
-LEGPIPE_ROOT="~/software"
+LEGPIPE_ROOT="$HOME/software"
 mkdir -p "$LEGPIPE_ROOT"
 
 #we add software paths to ~/.bashrc
 #change it if you have a different configuration
-PATHFILE='~/.bashrc'
-echo export LEGPIPE_ROOT=~/software >> "$PATHFILE"
+PATHFILE="$HOME/.bashrc"
+echo export LEGPIPE_ROOT="$HOME/software" >> "$PATHFILE"
 
 #minimal ubuntu setup
 echo "------------------ UBUNTU base updates"
