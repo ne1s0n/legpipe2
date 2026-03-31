@@ -56,7 +56,7 @@ sudo apt install -y bowtie2
 
 #samtools, here for version 1.3.1, update accordingly
 echo "------------------ samtools"
-sudo install samtools
+sudo apt install -y samtools
 
 #picard
 echo "------------------ picard"
